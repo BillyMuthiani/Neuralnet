@@ -27,3 +27,39 @@ class Sequential:
     def predict(self, X):
 
         return self.forward(X)
+
+    def fit(
+        self,
+        X,
+        y,
+        loss_function,
+        optimizer,
+        epochs=1000
+    ):
+
+        for epoch in range(epochs):
+
+            predictions = self.forward(X)
+
+            loss = loss_function.forward(
+                y,
+                predictions
+            )
+
+            dloss = loss_function.backward(
+                y,
+                predictions
+            )
+
+            self.backward(dloss)
+
+            for layer in self.layers:
+
+                optimizer.update(layer)
+
+            if epoch % 100 == 0:
+
+                print(
+                    f"Epoch {epoch} "
+                    f"Loss: {loss:.6f}"
+                )
