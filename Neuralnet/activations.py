@@ -11,13 +11,33 @@ class ReLU:
             0,
             X
         )
+
+    def backward(self, dvalues):
+
+        self.dinputs = dvalues.copy()
+
+        self.dinputs[
+            self.input <= 0
+        ] = 0
+
+        return self.dinputs
+
+
     
 class Sigmoid:
 
     def forward(self, X):
 
-        self.input = X
+        self.output = 1 / (1 + np.exp(-X))
 
-        return 1 / (
-            1 + np.exp(-X)
-        )    
+        return self.output
+
+    def backward(self, dvalues):
+
+        self.dinputs = (
+            dvalues
+            * self.output
+            * (1 - self.output)
+        )
+
+        return self.dinputs
