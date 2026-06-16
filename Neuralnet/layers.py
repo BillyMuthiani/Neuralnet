@@ -6,25 +6,17 @@ class Dense:
     def __init__(self, input_size, output_size):
 
         self.weights = (
-            np.random.randn(
-                input_size,
-                     output_size
-        )
+            np.random.randn(input_size, output_size)
             * np.sqrt(2 / input_size)
-            )
-
-        self.biases = np.zeros(
-            (1, output_size)
         )
+
+        self.biases = np.zeros((1, output_size))
 
     def forward(self, X):
 
         self.input = X
 
-        return np.dot(
-            X,
-            self.weights
-        ) + self.biases
+        return np.dot(X, self.weights) + self.biases
 
     def backward(self, dvalues):
 

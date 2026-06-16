@@ -29,53 +29,57 @@ class Sequential:
         return self.forward(X)
 
     def fit(
-     self,
-     X,
+        self,
+        X,
         y,
         loss_function,
         optimizer,
         epochs=1000,
         metric=None
-):
+    ):
 
-            for epoch in range(epochs):
+        history = {
+            "loss": []
+        }
 
-                predictions = self.forward(X)
+        if metric:
+            history["accuracy"] = []
 
-                loss = loss_function.forward(
+        for epoch in range(epochs):
+
+            predictions = self.forward(X)
+
+            loss = loss_function.forward(
                 y,
-                    predictions
-                    )
+                predictions
+            )
 
-                dloss = loss_function.backward(
+            history["loss"].append(loss)
+
+            dloss = loss_function.backward(
+                y,
+                predictions
+            )
+
+            self.backward(dloss)
+
+            for layer in self.layers:
+                optimizer.update(layer)
+
+            if metric:
+
+                score = metric.calculate(
                     y,
                     predictions
                 )
 
-                self.backward(dloss)
+                history["accuracy"].append(
+                    score
+                )
 
-                for layer in self.layers:
+            print(
+                f"Epoch {epoch} "
+                f"Loss: {loss:.6f}"
+            )
 
-                    optimizer.update(layer)
-
-                if epoch % 100 == 0:
-
-                    if metric:
-
-                     score = metric.calculate(
-                        y,
-                        predictions
-                    )
-
-                    print(
-                        f"Epoch {epoch} "
-                        f"Loss: {loss:.6f} "
-                        f"Accuracy: {score:.4f}"
-                    )
-
-                else:
-
-                    print(
-                        f"Epoch {epoch} "
-                        f"Loss: {loss:.6f}"
-                    )
+        return history

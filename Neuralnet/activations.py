@@ -7,23 +7,17 @@ class ReLU:
 
         self.input = X
 
-        return np.maximum(
-            0,
-            X
-        )
+        return np.maximum(0, X)
 
     def backward(self, dvalues):
 
         self.dinputs = dvalues.copy()
 
-        self.dinputs[
-            self.input <= 0
-        ] = 0
+        self.dinputs[self.input <= 0] = 0
 
         return self.dinputs
 
 
-    
 class Sigmoid:
 
     def forward(self, X):
@@ -41,32 +35,14 @@ class Sigmoid:
         )
 
         return self.dinputs
-    
-class Tanh:
 
-    def forward(self, X):
-
-        self.output = np.tanh(X)
-
-        return self.output
-
-    def backward(self, dvalues):
-
-        return (
-            dvalues *
-            (1 - self.output**2)
-        )
 
 class Softmax:
 
     def forward(self, X):
 
         exp_values = np.exp(
-            X - np.max(
-                X,
-                axis=1,
-                keepdims=True
-            )
+            X - np.max(X, axis=1, keepdims=True)
         )
 
         self.output = (
@@ -83,31 +59,22 @@ class Softmax:
 
     def backward(self, dvalues):
 
-        self.dinputs = np.empty_like(
-            dvalues
-        )
+        self.dinputs = np.empty_like(dvalues)
 
         for index, (
             single_output,
             single_dvalues
         ) in enumerate(
-            zip(
-                self.output,
-                dvalues
-            )
+            zip(self.output, dvalues)
         ):
 
-            single_output = (
-                single_output.reshape(
-                    -1,
-                    1
-                )
+            single_output = single_output.reshape(
+                -1,
+                1
             )
 
-            jacobian_matrix = (
-                np.diagflat(
-                    single_output
-                )
+            jacobian = (
+                np.diagflat(single_output)
                 -
                 np.dot(
                     single_output,
@@ -115,11 +82,9 @@ class Softmax:
                 )
             )
 
-            self.dinputs[index] = (
-                np.dot(
-                    jacobian_matrix,
-                    single_dvalues
-                )
+            self.dinputs[index] = np.dot(
+                jacobian,
+                single_dvalues
             )
 
         return self.dinputs

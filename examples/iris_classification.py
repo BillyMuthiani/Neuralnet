@@ -7,6 +7,7 @@ from Neuralnet.model import Sequential
 from Neuralnet.layers import Dense
 from Neuralnet.activations import ReLU, Softmax
 from Neuralnet.losses import CategoricalCrossEntropy
+from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
 from Neuralnet.optimizers import Adam
 from Neuralnet.metrics import Accuracy
 
@@ -51,7 +52,7 @@ model.add(Softmax())
 
 
 # Step 7: Train
-loss = CategoricalCrossEntropy()
+loss = SoftmaxCategoricalCrossEntropy()
 
 optimizer = Adam(
     learning_rate=0.001

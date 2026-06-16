@@ -1,8 +1,12 @@
 import numpy as np
 
+
 class SGD:
 
-    def __init__(self, learning_rate=0.01):
+    def __init__(
+        self,
+        learning_rate=0.01
+    ):
 
         self.learning_rate = learning_rate
 
@@ -32,12 +36,9 @@ class Adam:
     ):
 
         self.learning_rate = learning_rate
-
         self.beta1 = beta1
         self.beta2 = beta2
-
         self.epsilon = epsilon
-
         self.iterations = 0
 
     def update(self, layer):
@@ -96,43 +97,37 @@ class Adam:
         m_w_hat = (
             layer.m_w
             /
-            (1 - self.beta1**self.iterations)
+            (1 - self.beta1 ** self.iterations)
         )
 
         m_b_hat = (
             layer.m_b
             /
-            (1 - self.beta1**self.iterations)
+            (1 - self.beta1 ** self.iterations)
         )
 
         v_w_hat = (
             layer.v_w
             /
-            (1 - self.beta2**self.iterations)
+            (1 - self.beta2 ** self.iterations)
         )
 
         v_b_hat = (
             layer.v_b
             /
-            (1 - self.beta2**self.iterations)
+            (1 - self.beta2 ** self.iterations)
         )
 
         layer.weights -= (
             self.learning_rate
             * m_w_hat
             /
-            (
-                np.sqrt(v_w_hat)
-                + self.epsilon
-            )
+            (np.sqrt(v_w_hat) + self.epsilon)
         )
 
         layer.biases -= (
             self.learning_rate
             * m_b_hat
             /
-            (
-                np.sqrt(v_b_hat)
-                + self.epsilon
-            )
-        )            
+            (np.sqrt(v_b_hat) + self.epsilon)
+        )
