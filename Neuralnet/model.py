@@ -83,3 +83,4 @@ class Sequential:
             )
 
         return history
+    
