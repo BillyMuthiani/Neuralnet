@@ -133,6 +133,9 @@ class Sequential:
         if callbacks is None:
             callbacks = []
 
+        for callback in callbacks:
+            callback.model = self
+
         logs = {}
 
         for callback in callbacks:
@@ -236,6 +239,9 @@ class Sequential:
 
             for callback in callbacks:
                 callback.on_epoch_end(epoch, logs)
+
+            if getattr(self, "stop_training", False):
+                break
 
             if epoch % 100 == 0:
                 if self.metric:
