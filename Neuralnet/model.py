@@ -2,6 +2,33 @@ import warnings
 
 import numpy as np
 
+from Neuralnet.exceptions import NotCompiledError
+
+
+class History:
+
+    def __init__(self):
+        self.loss = []
+        self.accuracy = []
+
+    def __getitem__(self, key):
+        if key == "loss":
+            return self.loss
+        elif key == "accuracy":
+            return self.accuracy
+        raise KeyError(key)
+
+    def __setitem__(self, key, value):
+        if key == "loss":
+            self.loss = value
+        elif key == "accuracy":
+            self.accuracy = value
+        else:
+            raise KeyError(key)
+
+    def items(self):
+        return [("loss", self.loss), ("accuracy", self.accuracy)]
+
 
 class Sequential:
 
@@ -65,7 +92,6 @@ class Sequential:
         metric=None
     ):
 
-        # Handle deprecated signature for backwards compatibility
         if loss is not None or optimizer is not None or metric is not None:
             warnings.warn(
                 "Passing loss, optimizer, or metric to fit() is deprecated. "
@@ -80,12 +106,12 @@ class Sequential:
             if metric is not None:
                 self.metric = metric
 
-        history = {
-            "loss": []
-        }
+        if self.loss_function is None:
+            raise NotCompiledError(
+                "Compile the model before calling fit()."
+            )
 
-        if self.metric:
-            history["accuracy"] = []
+        history = History()
 
         for epoch in range(epochs):
 
@@ -96,7 +122,7 @@ class Sequential:
                 predictions
             )
 
-            history["loss"].append(loss_value)
+            history.loss.append(loss_value)
 
             dloss = self.loss_function.backward(
                 y,
@@ -115,7 +141,7 @@ class Sequential:
                     predictions
                 )
 
-                history["accuracy"].append(score)
+                history.accuracy.append(score)
 
                 if epoch % 100 == 0:
                     print(

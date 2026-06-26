@@ -1,15 +1,24 @@
 import numpy as np
+from Neuralnet.initializers import he_normal, xavier_uniform, lecun_normal
 
 
 class Dense:
 
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, initializer="he_normal"):
 
-        self.weights = (
-            np.random.randn(input_size, output_size)
-            * np.sqrt(2 / input_size)
-        )
+        init_func = {
+            "he_normal": he_normal,
+            "xavier_uniform": xavier_uniform,
+            "lecun_normal": lecun_normal,
+        }.get(initializer)
 
+        if init_func is None:
+            raise ValueError(
+                f"Unknown initializer: {initializer}. "
+                f"Available: he_normal, xavier_uniform, lecun_normal"
+            )
+
+        self.weights = init_func(input_size, output_size)
         self.biases = np.zeros((1, output_size))
 
     def forward(self, X):
