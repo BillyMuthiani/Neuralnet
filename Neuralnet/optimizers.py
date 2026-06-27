@@ -24,6 +24,18 @@ class SGD:
                 * layer.dbiases
             )
 
+        if hasattr(layer, "gamma"):
+
+            layer.gamma -= (
+                self.learning_rate
+                * layer.dgamma
+            )
+
+            layer.beta -= (
+                self.learning_rate
+                * layer.dbeta
+            )
+
 
 class Adam:
 
@@ -43,91 +55,178 @@ class Adam:
 
     def update(self, layer):
 
-        if not hasattr(layer, "weights"):
-            return
+        if hasattr(layer, "weights"):
 
-        if not hasattr(layer, "m_w"):
+            if not hasattr(layer, "m_w"):
 
-            layer.m_w = np.zeros_like(
-                layer.weights
+                layer.m_w = np.zeros_like(
+                    layer.weights
+                )
+
+                layer.v_w = np.zeros_like(
+                    layer.weights
+                )
+
+                layer.m_b = np.zeros_like(
+                    layer.biases
+                )
+
+                layer.v_b = np.zeros_like(
+                    layer.biases
+                )
+
+            self.iterations += 1
+
+            layer.m_w = (
+                self.beta1 * layer.m_w
+                +
+                (1 - self.beta1)
+                * layer.dweights
             )
 
-            layer.v_w = np.zeros_like(
-                layer.weights
+            layer.m_b = (
+                self.beta1 * layer.m_b
+                +
+                (1 - self.beta1)
+                * layer.dbiases
             )
 
-            layer.m_b = np.zeros_like(
-                layer.biases
+            layer.v_w = (
+                self.beta2 * layer.v_w
+                +
+                (1 - self.beta2)
+                * (layer.dweights ** 2)
             )
 
-            layer.v_b = np.zeros_like(
-                layer.biases
+            layer.v_b = (
+                self.beta2 * layer.v_b
+                +
+                (1 - self.beta2)
+                * (layer.dbiases ** 2)
             )
 
-        self.iterations += 1
+            m_w_hat = (
+                layer.m_w
+                /
+                (1 - self.beta1 ** self.iterations)
+            )
 
-        layer.m_w = (
-            self.beta1 * layer.m_w
-            +
-            (1 - self.beta1)
-            * layer.dweights
-        )
+            m_b_hat = (
+                layer.m_b
+                /
+                (1 - self.beta1 ** self.iterations)
+            )
 
-        layer.m_b = (
-            self.beta1 * layer.m_b
-            +
-            (1 - self.beta1)
-            * layer.dbiases
-        )
+            v_w_hat = (
+                layer.v_w
+                /
+                (1 - self.beta2 ** self.iterations)
+            )
 
-        layer.v_w = (
-            self.beta2 * layer.v_w
-            +
-            (1 - self.beta2)
-            * (layer.dweights ** 2)
-        )
+            v_b_hat = (
+                layer.v_b
+                /
+                (1 - self.beta2 ** self.iterations)
+            )
 
-        layer.v_b = (
-            self.beta2 * layer.v_b
-            +
-            (1 - self.beta2)
-            * (layer.dbiases ** 2)
-        )
+            layer.weights -= (
+                self.learning_rate
+                * m_w_hat
+                /
+                (np.sqrt(v_w_hat) + self.epsilon)
+            )
 
-        m_w_hat = (
-            layer.m_w
-            /
-            (1 - self.beta1 ** self.iterations)
-        )
+            layer.biases -= (
+                self.learning_rate
+                * m_b_hat
+                /
+                (np.sqrt(v_b_hat) + self.epsilon)
+            )
 
-        m_b_hat = (
-            layer.m_b
-            /
-            (1 - self.beta1 ** self.iterations)
-        )
+        if hasattr(layer, "gamma"):
 
-        v_w_hat = (
-            layer.v_w
-            /
-            (1 - self.beta2 ** self.iterations)
-        )
+            if not hasattr(layer, "m_gamma"):
 
-        v_b_hat = (
-            layer.v_b
-            /
-            (1 - self.beta2 ** self.iterations)
-        )
+                layer.m_gamma = np.zeros_like(
+                    layer.gamma
+                )
 
-        layer.weights -= (
-            self.learning_rate
-            * m_w_hat
-            /
-            (np.sqrt(v_w_hat) + self.epsilon)
-        )
+                layer.v_gamma = np.zeros_like(
+                    layer.gamma
+                )
 
-        layer.biases -= (
-            self.learning_rate
-            * m_b_hat
-            /
-            (np.sqrt(v_b_hat) + self.epsilon)
-        )
+                layer.m_beta = np.zeros_like(
+                    layer.beta
+                )
+
+                layer.v_beta = np.zeros_like(
+                    layer.beta
+                )
+
+            self.iterations += 1
+
+            layer.m_gamma = (
+                self.beta1 * layer.m_gamma
+                +
+                (1 - self.beta1)
+                * layer.dgamma
+            )
+
+            layer.m_beta = (
+                self.beta1 * layer.m_beta
+                +
+                (1 - self.beta1)
+                * layer.dbeta
+            )
+
+            layer.v_gamma = (
+                self.beta2 * layer.v_gamma
+                +
+                (1 - self.beta2)
+                * (layer.dgamma ** 2)
+            )
+
+            layer.v_beta = (
+                self.beta2 * layer.v_beta
+                +
+                (1 - self.beta2)
+                * (layer.dbeta ** 2)
+            )
+
+            m_gamma_hat = (
+                layer.m_gamma
+                /
+                (1 - self.beta1 ** self.iterations)
+            )
+
+            m_beta_hat = (
+                layer.m_beta
+                /
+                (1 - self.beta1 ** self.iterations)
+            )
+
+            v_gamma_hat = (
+                layer.v_gamma
+                /
+                (1 - self.beta2 ** self.iterations)
+            )
+
+            v_beta_hat = (
+                layer.v_beta
+                /
+                (1 - self.beta2 ** self.iterations)
+            )
+
+            layer.gamma -= (
+                self.learning_rate
+                * m_gamma_hat
+                /
+                (np.sqrt(v_gamma_hat) + self.epsilon)
+            )
+
+            layer.beta -= (
+                self.learning_rate
+                * m_beta_hat
+                /
+                (np.sqrt(v_beta_hat) + self.epsilon)
+            )

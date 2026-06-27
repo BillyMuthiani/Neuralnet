@@ -103,3 +103,110 @@ class Dropout:
             Gradient values with dropout mask applied.
         """
         return dvalues * self.mask / (1 - self.rate)
+
+
+class BatchNormalization:
+    """Batch normalization layer for stabilizing training.
+
+    Normalizes inputs across the batch dimension and learns scale (gamma) and
+    shift (beta) parameters during training.
+    """
+
+    def __init__(self, momentum=0.9, epsilon=1e-5):
+        """Initialize the BatchNormalization layer.
+
+        Args:
+            momentum: Momentum for running mean/variance updates. Defaults to 0.9.
+            epsilon: Small constant for numerical stability. Defaults to 1e-5.
+        """
+        self.momentum = momentum
+        self.epsilon = epsilon
+        self.gamma = None
+        self.beta = None
+        self.running_mean = None
+        self.running_variance = None
+        self.input = None
+        self.normalized = None
+        self.mean = None
+        self.var = None
+        self.std = None
+
+    def forward(self, X, training=True):
+        """Normalize inputs using batch or running statistics.
+
+        During training, computes batch mean/variance and updates running statistics.
+        During inference, uses running statistics for normalization.
+
+        Args:
+            X: Input array to normalize.
+            training: If True, use batch statistics; if False, use running statistics.
+
+        Returns:
+            Normalized input with learned scale and shift applied.
+        """
+        if self.gamma is None:
+            self.gamma = np.ones((1, X.shape[1]))
+            self.beta = np.zeros((1, X.shape[1]))
+            self.running_mean = np.zeros((1, X.shape[1]))
+            self.running_variance = np.ones((1, X.shape[1]))
+
+        if training:
+            self.input = X
+            self.mean = np.mean(X, axis=0, keepdims=True)
+            self.var = np.var(X, axis=0, keepdims=True)
+            self.std = np.sqrt(self.var + self.epsilon)
+
+            self.normalized = (X - self.mean) / self.std
+
+            self.running_mean = (
+                self.momentum * self.running_mean +
+                (1 - self.momentum) * self.mean
+            )
+            self.running_variance = (
+                self.momentum * self.running_variance +
+                (1 - self.momentum) * self.var
+            )
+
+            return self.gamma * self.normalized + self.beta
+        else:
+            normalized = (X - self.running_mean) / np.sqrt(self.running_variance + self.epsilon)
+            return self.gamma * normalized + self.beta
+
+    def backward(self, dvalues):
+        """Backward pass for batch normalization gradients.
+
+        Args:
+            dvalues: Gradient values from the next layer.
+
+        Returns:
+            Gradient with respect to inputs.
+        """
+        N = self.input.shape[0]
+
+        dgamma = np.sum(dvalues * self.normalized, axis=0, keepdims=True)
+        dbeta = np.sum(dvalues, axis=0, keepdims=True)
+
+        self.dgamma = dgamma
+        self.dbeta = dbeta
+
+        dnormalized = dvalues * self.gamma
+        dvar = np.sum(
+            dnormalized * (self.input - self.mean) * -0.5 *
+            (self.var + self.epsilon) ** (-3/2),
+            axis=0,
+            keepdims=True
+        )
+
+        dmean = np.sum(
+            dnormalized * -1 / self.std,
+            axis=0,
+            keepdims=True
+        ) + dvar * np.sum(-2 * (self.input - self.mean), axis=0, keepdims=True) / N
+
+        dinputs = (
+            dnormalized / self.std +
+            dvar * 2 * (self.input - self.mean) / N +
+            dmean / N
+        )
+
+        return dinputs
