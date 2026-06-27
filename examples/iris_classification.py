@@ -9,40 +9,34 @@ from Neuralnet.activations import ReLU, Softmax
 from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
 from Neuralnet.optimizers import Adam
 from Neuralnet.metrics import Accuracy
-# Optional: Uncomment to save best model during training
-# from Neuralnet.callbacks import ModelCheckpoint
 
-
-# Step 3: Load Iris Dataset
+# Load Iris Dataset
 iris = load_iris()
 
-X = iris.data
+x = iris.data
 y = iris.target
 
-print(X.shape)
+print(x.shape)
 print(y.shape)
 
-
-# Step 4: Train/Test Split
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
+# Train/Test Split
+x_train, x_test, y_train, y_test = train_test_split(
+    x,
     y,
     test_size=0.2,
     random_state=42
 )
 
+# Normalize Features
+x_train = (
+    x_train - x_train.mean(axis=0)
+) / x_train.std(axis=0)
 
-# Step 5: Normalize Features
-X_train = (
-    X_train - X_train.mean(axis=0)
-) / X_train.std(axis=0)
+x_test = (
+    x_test - x_test.mean(axis=0)
+) / x_test.std(axis=0)
 
-X_test = (
-    X_test - X_test.mean(axis=0)
-) / X_test.std(axis=0)
-
-
-# Step 6: Build Model
+# Build Model
 model = Sequential()
 
 model.add(Dense(4, 16))
@@ -51,8 +45,7 @@ model.add(ReLU())
 model.add(Dense(16, 3))
 model.add(Softmax())
 
-
-# Step 7: Train
+# Train
 model.compile(
     loss=SoftmaxCategoricalCrossEntropy(),
     optimizer=Adam(learning_rate=0.001),
@@ -60,15 +53,13 @@ model.compile(
 )
 
 model.fit(
-    X_train,
+    x_train,
     y_train,
     epochs=5000
-    # Optional: Add callbacks=[ModelCheckpoint("checkpoints/best.npz")] for auto-save
 )
 
-
-# Step 8: Evaluate
-predictions = model.predict(X_test)
+# Evaluate
+predictions = model.predict(x_test)
 
 predicted_classes = np.argmax(
     predictions,

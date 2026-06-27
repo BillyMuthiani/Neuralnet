@@ -7,19 +7,17 @@ from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
 from Neuralnet.optimizers import Adam
 from Neuralnet.metrics import Accuracy
 
-
 # Generate synthetic image data for demonstration
 # 100 samples, 8x8 "images" with 3 channels, 3 classes
 np.random.seed(42)
 
-X_train = np.random.randn(100, 8, 8, 3)
+x_train = np.random.randn(100, 8, 8, 3)
 y_train = np.random.randint(0, 3, 100)
 
-X_test = np.random.randn(20, 8, 8, 3)
+x_test = np.random.randn(20, 8, 8, 3)
 y_test = np.random.randint(0, 3, 20)
 
-print(f'Input shape: {X_train.shape}')
-
+print(f'Input shape: {x_train.shape}')
 
 # Build Model with Conv2D
 model = Sequential()
@@ -33,7 +31,6 @@ model.add(Flatten())
 model.add(Dense(256, 3))
 model.add(Softmax())
 
-
 # Train
 model.compile(
     loss=SoftmaxCategoricalCrossEntropy(),
@@ -42,14 +39,13 @@ model.compile(
 )
 
 model.fit(
-    X_train,
+    x_train,
     y_train,
     epochs=50
 )
 
-
 # Evaluate
-predictions = model.predict(X_test)
+predictions = model.predict(x_test)
 
 predicted_classes = np.argmax(
     predictions,

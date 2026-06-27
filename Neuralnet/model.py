@@ -58,9 +58,9 @@ class Sequential:
 
         self.layers.append(layer)
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
 
-        output = X
+        output = x
 
         for layer in self.layers:
             output = layer.forward(output, training=training)
@@ -72,9 +72,9 @@ class Sequential:
         for layer in reversed(self.layers):
             dvalues = layer.backward(dvalues)
 
-    def predict(self, X):
+    def predict(self, x):
 
-        return self.forward(X, training=False)
+        return self.forward(x, training=False)
 
     def compile(
         self,
@@ -108,7 +108,7 @@ class Sequential:
 
     def fit(
         self,
-        X,
+        x,
         y,
         epochs=1000,
         loss=None,
@@ -152,7 +152,7 @@ class Sequential:
 
         history = History()
 
-        samples = len(X)
+        samples = len(x)
 
         batch_size = batch_size if batch_size is not None else samples
 
@@ -167,10 +167,10 @@ class Sequential:
 
             if shuffle:
                 indices = np.random.permutation(samples)
-                X_shuffled = X[indices]
+                x_shuffled = x[indices]
                 y_shuffled = y[indices]
             else:
-                X_shuffled = X
+                x_shuffled = x
                 y_shuffled = y
 
             for batch_idx, start_idx in enumerate(range(0, samples, batch_size)):
@@ -179,10 +179,10 @@ class Sequential:
                     callback.on_batch_begin(batch_idx, logs)
 
                 end_idx = min(start_idx + batch_size, samples)
-                X_batch = X_shuffled[start_idx:end_idx]
+                x_batch = x_shuffled[start_idx:end_idx]
                 y_batch = y_shuffled[start_idx:end_idx]
 
-                predictions = self.forward(X_batch, training=True)
+                predictions = self.forward(x_batch, training=True)
 
                 loss_value = self.loss_function.forward(
                     y_batch,
@@ -231,8 +231,8 @@ class Sequential:
 
             if validation_data is not None:
 
-                X_val, y_val = validation_data
-                val_predictions = self.forward(X_val, training=False)
+                x_val, y_val = validation_data
+                val_predictions = self.forward(x_val, training=False)
                 val_loss = self.loss_function.forward(y_val, val_predictions)
                 history.val_loss.append(val_loss)
                 logs["val_loss"] = val_loss

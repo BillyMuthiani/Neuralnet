@@ -8,12 +8,11 @@ from Neuralnet.optimizers import Adam
 
 from Neuralnet.model import Sequential
 
-
-X = np.array([
-    [0,0],
-    [0,1],
-    [1,0],
-    [1,1]
+x = np.array([
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1]
 ])
 
 y = np.array([
@@ -22,7 +21,6 @@ y = np.array([
     [1],
     [0]
 ])
-
 
 model = Sequential()
 
@@ -39,11 +37,11 @@ model.compile(
 )
 
 model.fit(
-    X,
+    x,
     y,
     epochs=5000
 )
 
-predictions = model.predict(X)
+predictions = model.predict(x)
 
 print(predictions)

@@ -23,12 +23,12 @@ class Dense:
         self.kernel_regularizer = kernel_regularizer
         self.regularization_loss = 0.0
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
 
         if training:
-            self.input = X
+            self.input = x
 
-        return np.dot(X, self.weights) + self.biases
+        return np.dot(x, self.weights) + self.biases
 
     def backward(self, dvalues):
 
@@ -79,14 +79,14 @@ class Dropout:
         self.mask = None
         self.input = None
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
         """Apply dropout to input.
 
         During training, randomly zeros activations with probability rate and scales
         remaining activations by 1/(1-rate). During inference, returns inputs unchanged.
 
         Args:
-            X: Input array to apply dropout to.
+            x: Input array to apply dropout to.
             training: If True, apply dropout; if False, return inputs unchanged.
 
         Returns:
@@ -94,10 +94,10 @@ class Dropout:
             inference.
         """
         if training:
-            self.input = X
-            self.mask = np.random.rand(*X.shape) > self.rate
-            return X * self.mask / (1 - self.rate)
-        return X
+            self.input = x
+            self.mask = np.random.rand(*x.shape) > self.rate
+            return x * self.mask / (1 - self.rate)
+        return x
 
     def backward(self, dvalues):
         """Backward pass applying cached dropout mask.
@@ -141,32 +141,32 @@ class BatchNormalization:
         self.var = None
         self.std = None
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
         """Normalize inputs using batch or running statistics.
 
         During training, computes batch mean/variance and updates running statistics.
         During inference, uses running statistics for normalization.
 
         Args:
-            X: Input array to normalize.
+            x: Input array to normalize.
             training: If True, use batch statistics; if False, use running statistics.
 
         Returns:
             Normalized input with learned scale and shift applied.
         """
         if self.gamma is None:
-            self.gamma = np.ones((1, X.shape[1]))
-            self.beta = np.zeros((1, X.shape[1]))
-            self.running_mean = np.zeros((1, X.shape[1]))
-            self.running_variance = np.ones((1, X.shape[1]))
+            self.gamma = np.ones((1, x.shape[1]))
+            self.beta = np.zeros((1, x.shape[1]))
+            self.running_mean = np.zeros((1, x.shape[1]))
+            self.running_variance = np.ones((1, x.shape[1]))
 
         if training:
-            self.input = X
-            self.mean = np.mean(X, axis=0, keepdims=True)
-            self.var = np.var(X, axis=0, keepdims=True)
+            self.input = x
+            self.mean = np.mean(x, axis=0, keepdims=True)
+            self.var = np.var(x, axis=0, keepdims=True)
             self.std = np.sqrt(self.var + self.epsilon)
 
-            self.normalized = (X - self.mean) / self.std
+            self.normalized = (x - self.mean) / self.std
 
             self.running_mean = (
                 self.momentum * self.running_mean +
@@ -179,9 +179,9 @@ class BatchNormalization:
 
             return self.gamma * self.normalized + self.beta
         else:
-            self.input = X  # Store for gradient checking
+            self.input = x
             self.std = np.sqrt(self.running_variance + self.epsilon)
-            self.normalized = (X - self.running_mean) / self.std
+            self.normalized = (x - self.running_mean) / self.std
             return self.gamma * self.normalized + self.beta
 
     def backward(self, dvalues):
@@ -193,17 +193,13 @@ class BatchNormalization:
         Returns:
             Gradient with respect to inputs.
         """
-        # Check if we have training statistics (needed for backward)
-        # Inference mode: running stats are constants, so gradient is simpler
+        n = self.input.shape[0]
+
         if self.normalized is None or self.mean is None or self.var is None:
-            # Inference mode: use running stats as constants
-            # gradient of (x - mean) / std * gamma + beta w.r.t. x is just gamma / std
             self.dinputs = dvalues * (self.gamma / self.std)
             self.dgamma = np.sum(dvalues * self.normalized, axis=0, keepdims=True)
             self.dbeta = np.sum(dvalues, axis=0, keepdims=True)
             return self.dinputs
-        
-        N = self.input.shape[0]
 
         dgamma = np.sum(dvalues * self.normalized, axis=0, keepdims=True)
         dbeta = np.sum(dvalues, axis=0, keepdims=True)
@@ -223,12 +219,12 @@ class BatchNormalization:
             dnormalized * -1 / self.std,
             axis=0,
             keepdims=True
-        ) + dvar * np.sum(-2 * (self.input - self.mean), axis=0, keepdims=True) / N
+        ) + dvar * np.sum(-2 * (self.input - self.mean), axis=0, keepdims=True) / n
 
         dinputs = (
             dnormalized / self.std +
-            dvar * 2 * (self.input - self.mean) / N +
-            dmean / N
+            dvar * 2 * (self.input - self.mean) / n +
+            dmean / n
         )
 
         self.dinputs = dinputs
@@ -279,11 +275,11 @@ def _get_padding(padding, kernel_size, stride):
     return pad_h, pad_w
 
 
-def _pad_input(X, pad_h, pad_w):
+def _pad_input(x, pad_h, pad_w):
     """Pad input tensor with zeros."""
     if pad_h == 0 and pad_w == 0:
-        return X
-    return np.pad(X, ((0, 0), (pad_h, pad_h), (pad_w, pad_w), (0, 0)), mode="constant")
+        return x
+    return np.pad(x, ((0, 0), (pad_h, pad_h), (pad_w, pad_w), (0, 0)), mode="constant")
 
 
 def _init_conv_kernel(kernel_h, kernel_w, in_channels, filters, initializer):
@@ -348,17 +344,17 @@ class Conv2D:
         self.pad_h = 0
         self.pad_w = 0
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
         """Forward pass for 2D convolution.
 
         Args:
-            X: Input array of shape (batch, height, width, channels).
+            x: Input array of shape (batch, height, width, channels).
             training: If True, cache inputs for backward pass.
 
         Returns:
             Output array of shape (batch, out_h, out_w, filters).
         """
-        batch, in_h, in_w, in_channels = X.shape
+        batch, in_h, in_w, in_channels = x.shape
 
         if isinstance(self.kernel_size, int):
             kernel_h = kernel_w = self.kernel_size
@@ -370,29 +366,24 @@ class Conv2D:
         else:
             stride_h, stride_w = self.stride
 
-        # Initialize kernels if not already done
         if self.kernels is None:
             self.kernels = _init_conv_kernel(
                 kernel_h, kernel_w, in_channels, self.filters, self.initializer
             )
             self.biases = np.zeros((self.filters,))
 
-        # Compute output shape
         out_h, out_w = _compute_conv_output_shape(
             in_h, in_w, self.kernel_size, self.stride, self.padding
         )
 
-        # Compute padding
         self.pad_h, self.pad_w = _get_padding(self.padding, self.kernel_size, self.stride)
 
-        # Pad input if needed
         if training:
-            self.input = X
-            self.padded_input = _pad_input(X, self.pad_h, self.pad_w)
+            self.input = x
+            self.padded_input = _pad_input(x, self.pad_h, self.pad_w)
         else:
-            self.padded_input = _pad_input(X, self.pad_h, self.pad_w)
+            self.padded_input = _pad_input(x, self.pad_h, self.pad_w)
 
-        # Perform convolution using im2col approach
         output = np.zeros((batch, out_h, out_w, self.filters))
 
         for i in range(out_h):
@@ -403,7 +394,9 @@ class Conv2D:
                 w_end = w_start + kernel_w
 
                 patch = self.padded_input[:, h_start:h_end, w_start:w_end, :]
-                output[:, i, j, :] = np.tensordot(patch, self.kernels, axes=([1, 2, 3], [0, 1, 2])) + self.biases
+                output[:, i, j, :] = np.tensordot(
+                    patch, self.kernels, axes=([1, 2, 3], [0, 1, 2])
+                ) + self.biases
 
         return output
 
@@ -426,15 +419,12 @@ class Conv2D:
 
         out_h, out_w = dvalues.shape[1], dvalues.shape[2]
 
-        # Initialize gradients
         dkernels = np.zeros_like(self.kernels)
         dbiases = np.zeros_like(self.biases)
         dinputs_padded = np.zeros_like(self.padded_input)
 
-        # Compute bias gradients
         dbiases = np.sum(dvalues, axis=(0, 1, 2))
 
-        # Compute kernel and input gradients
         for i in range(out_h):
             for j in range(out_w):
                 h_start = i * stride_h
@@ -444,13 +434,11 @@ class Conv2D:
 
                 patch = self.padded_input[:, h_start:h_end, w_start:w_end, :]
 
-                # Kernel gradient
-                # patch: (batch, kh, kw, c) -> dvalues: (batch, f)
-                # dkernels: (kh, kw, c, f)
                 for b in range(batch):
-                    dkernels += np.expand_dims(patch[b], -1) * np.expand_dims(dvalues[b, i, j], (0, 1, 2))
+                    dkernels += np.expand_dims(patch[b], -1) * np.expand_dims(
+                        dvalues[b, i, j], (0, 1, 2)
+                    )
 
-                # Input gradient
                 for b in range(batch):
                     dinputs_padded[b, h_start:h_end, w_start:w_end, :] += np.tensordot(
                         dvalues[b, i, j], self.kernels, axes=(0, 3)
@@ -459,7 +447,6 @@ class Conv2D:
         self.dkernels = dkernels
         self.dbiases = dbiases
 
-        # Remove padding from input gradient
         if self.pad_h > 0 or self.pad_w > 0:
             if self.pad_h > 0 and self.pad_w > 0:
                 dinputs = dinputs_padded[:, self.pad_h:-self.pad_h, self.pad_w:-self.pad_w, :]
@@ -485,11 +472,11 @@ class Flatten:
         """Initialize the Flatten layer."""
         self.input_shape = None
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
         """Flatten input to 2D shape (batch, features).
 
         Args:
-            X: Input array of any shape.
+            x: Input array of any shape.
             training: Ignored (included for API consistency).
 
         Returns:
@@ -497,9 +484,9 @@ class Flatten:
             product of all dimensions after the batch dimension.
         """
         if training:
-            self.input_shape = X.shape
+            self.input_shape = x.shape
 
-        return X.reshape(X.shape[0], -1)
+        return x.reshape(x.shape[0], -1)
 
     def backward(self, dvalues):
         """Restore original input shape from flattened gradients.

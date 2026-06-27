@@ -7,27 +7,24 @@ from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
 from Neuralnet.optimizers import Adam
 from Neuralnet.metrics import Accuracy
 import numpy as np
-import matplotlib.pyplot as plt
 
 digits = load_digits()
 
-X = digits.data
+x = digits.data
 y = digits.target
 
-print(X.shape)
+print(x.shape)
 print(y.shape)
 
-
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
+x_train, x_test, y_train, y_test = train_test_split(
+    x,
     y,
     test_size=0.2,
     random_state=42
 )
 
-X_train = X_train / 16.0
-X_test = X_test / 16.0
+x_train = x_train / 16.0
+x_test = x_test / 16.0
 
 model = Sequential()
 
@@ -40,7 +37,6 @@ model.add(ReLU())
 model.add(Dense(64, 10))
 model.add(Softmax())
 
-
 model.compile(
     loss=SoftmaxCategoricalCrossEntropy(),
     optimizer=Adam(
@@ -50,13 +46,12 @@ model.compile(
 )
 
 history = model.fit(
-    X_train,
+    x_train,
     y_train,
     epochs=1000
 )
 
-
-predictions = model.predict(X_test)
+predictions = model.predict(x_test)
 
 predicted_classes = np.argmax(
     predictions,
@@ -70,28 +65,3 @@ accuracy = np.mean(
 print(
     f"Test Accuracy: {accuracy:.4f}"
 )
-
-model.save("digits_model.npz")
-
-model.load("digits_model.npz")
-
-
-index = 0
-
-plt.imshow(
-    X_test[index].reshape(8, 8),
-    cmap="gray"
-)
-
-plt.title(
-    f"Predicted: {predicted_classes[index]}"
-)
-
-plt.show()
-
-
-plt.plot(history["loss"])
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.title("Training Loss")
-plt.show()

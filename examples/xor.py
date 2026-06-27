@@ -8,7 +8,7 @@ from Neuralnet.optimizers import SGD
 from Neuralnet.metrics import Accuracy
 
 # XOR dataset
-X = np.array([
+x = np.array([
     [0, 0],
     [0, 1],
     [1, 0],
@@ -17,7 +17,7 @@ X = np.array([
 
 y = np.array([0, 1, 1, 0]).reshape(-1, 1)
 
-print(f"Input shape: {X.shape}")
+print(f"Input shape: {x.shape}")
 print(f"Target shape: {y.shape}")
 
 # Build model
@@ -34,9 +34,9 @@ model.compile(
 )
 
 # Train
-model.fit(X, y, epochs=10000)
+model.fit(x, y, epochs=10000)
 
 # Evaluate
-predictions = model.predict(X)
+predictions = model.predict(x)
 print(f"\nPredictions:\n{predictions}")
 print(f"Targets:\n{y}")

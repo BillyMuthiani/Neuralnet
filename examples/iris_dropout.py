@@ -10,46 +10,41 @@ from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
 from Neuralnet.optimizers import Adam
 from Neuralnet.metrics import Accuracy
 
-
 # Load Iris Dataset
 iris = load_iris()
 
-X = iris.data
+x = iris.data
 y = iris.target
 
-print(X.shape)
+print(x.shape)
 print(y.shape)
 
-
 # Train/Test Split
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
+x_train, x_test, y_train, y_test = train_test_split(
+    x,
     y,
     test_size=0.2,
     random_state=42
 )
 
-
 # Normalize Features
-X_train = (
-    X_train - X_train.mean(axis=0)
-) / X_train.std(axis=0)
+x_train = (
+    x_train - x_train.mean(axis=0)
+) / x_train.std(axis=0)
 
-X_test = (
-    X_test - X_test.mean(axis=0)
-) / X_test.std(axis=0)
-
+x_test = (
+    x_test - x_test.mean(axis=0)
+) / x_test.std(axis=0)
 
 # Build Model with Dropout Regularization
 model = Sequential()
 
 model.add(Dense(4, 16))
 model.add(ReLU())
-model.add(Dropout(0.3))  # Drop 30% of neurons during training
+model.add(Dropout(0.3))
 
 model.add(Dense(16, 3))
 model.add(Softmax())
-
 
 # Train
 model.compile(
@@ -59,14 +54,13 @@ model.compile(
 )
 
 model.fit(
-    X_train,
+    x_train,
     y_train,
     epochs=1000
 )
 
-
 # Evaluate
-predictions = model.predict(X_test)
+predictions = model.predict(x_test)
 
 predicted_classes = np.argmax(
     predictions,

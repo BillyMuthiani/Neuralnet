@@ -422,7 +422,8 @@ class EarlyStopping(Callback):
         """
         for layer, weight_data in zip(
             [l for l in self.model.layers if hasattr(l, "weights")],
-            weights
+            weights,
+            strict=False
         ):
             layer.weights, layer.biases = weight_data[0].copy(), weight_data[1].copy()
 

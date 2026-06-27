@@ -16,7 +16,7 @@ class TestDropout:
     def test_forward_training(self, dropout, input_data):
         output = dropout.forward(input_data, training=True)
         assert output.shape == (2, 10)
-        
+
         # During training, some elements should be zeroed
         # and remaining should be scaled by 1/(1-rate)
         assert np.any(output == 0)
@@ -36,7 +36,7 @@ class TestDropout:
         dout = np.random.randn(*input_data.shape)
         dinputs = dropout.backward(dout)
         assert dinputs.shape == input_data.shape
-        
+
         # Gradient should be zero where mask was zero
         assert np.any(dinputs == 0)
 
@@ -64,14 +64,13 @@ class TestDropout:
 
     def test_serialization(self, dropout, input_data):
         dropout.forward(input_data, training=True)
-        
+
         mask_copy = dropout.mask.copy()
         input_copy = dropout.input.copy()
-        
-        # Restore
+
         dropout.mask = mask_copy
         dropout.input = input_copy
-        
+
         dout = np.ones_like(input_data)
         dinputs = dropout.backward(dout)
         expected = dout * mask_copy / (1 - 0.3)
@@ -79,10 +78,10 @@ class TestDropout:
 
     def test_gradient_check(self):
         from tests.gradient_check import check_layer_gradient
-        
+
         dropout = Dropout(rate=0.3)
         input_data = np.random.randn(2, 10)
-        
+
         # In inference mode, dropout is identity
         passed, _, _ = check_layer_gradient(dropout, input_data, "Dropout (inference)", training=False)
         assert passed, "Dropout inference gradient check failed"

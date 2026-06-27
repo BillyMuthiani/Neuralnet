@@ -23,34 +23,30 @@ def benchmark_dense(
     layer = Dense(input_size, output_size)
     activation = ReLU()
 
-    X = np.random.randn(batch_size, input_size)
+    x = np.random.randn(batch_size, input_size)
     dvalues = np.random.randn(batch_size, output_size)
 
-    # Warmup
     for _ in range(100):
-        out = layer.forward(X, training=True)
+        out = layer.forward(x, training=True)
         out = activation.forward(out, training=True)
         d = activation.backward(dvalues)
         layer.backward(d)
 
-    # Benchmark forward
     start = time.perf_counter()
     for _ in range(iterations):
-        out = layer.forward(X, training=True)
+        out = layer.forward(x, training=True)
         out = activation.forward(out, training=True)
     forward_time = (time.perf_counter() - start) / iterations
 
-    # Benchmark backward
     start = time.perf_counter()
     for _ in range(iterations):
         d = activation.backward(dvalues)
         layer.backward(d)
     backward_time = (time.perf_counter() - start) / iterations
 
-    # Benchmark training throughput
     start = time.perf_counter()
     for _ in range(iterations):
-        out = layer.forward(X, training=True)
+        out = layer.forward(x, training=True)
         out = activation.forward(out, training=True)
         d = activation.backward(dvalues)
         layer.backward(d)

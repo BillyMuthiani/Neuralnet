@@ -92,5 +92,4 @@ class SoftmaxCategoricalCrossEntropy:
         return self.dinputs
 
 
-# Alias for backwards compatibility
 CategoricalCrossEntropy = SoftmaxCategoricalCrossEntropy

@@ -33,10 +33,10 @@ class TestL2Regularizer:
 
     def test_gradient_check(self):
         from tests.gradient_check import check_regularizer_gradient
-        
+
         l2 = L2(lambda_=0.1)
         weights = np.random.randn(4, 8)
-        
+
         passed, _, _ = check_regularizer_gradient(l2, weights, name="L2")
         assert passed, "L2 regularizer gradient check failed"
 

@@ -29,38 +29,33 @@ def benchmark_conv2d(
     conv = Conv2D(filters=filters, kernel_size=kernel_size, padding="same")
     activation = ReLU()
 
-    X = np.random.randn(batch_size, height, width, channels)
+    x = np.random.randn(batch_size, height, width, channels)
 
-    # Forward pass to get output shape
-    _ = conv.forward(X, training=True)
-    _, out_h, out_w, _ = conv.forward(X, training=True).shape
+    _ = conv.forward(x, training=True)
+    _, out_h, out_w, _ = conv.forward(x, training=True).shape
     dvalues = np.random.randn(batch_size, out_h, out_w, filters)
 
-    # Warmup
     for _ in range(100):
-        out = conv.forward(X, training=True)
+        out = conv.forward(x, training=True)
         out = activation.forward(out, training=True)
         d = activation.backward(dvalues.copy())
         conv.backward(d)
 
-    # Benchmark forward
     start = time.perf_counter()
     for _ in range(iterations):
-        out = conv.forward(X, training=True)
+        out = conv.forward(x, training=True)
         out = activation.forward(out, training=True)
     forward_time = (time.perf_counter() - start) / iterations
 
-    # Benchmark backward
     start = time.perf_counter()
     for _ in range(iterations):
         d = activation.backward(dvalues.copy())
         conv.backward(d)
     backward_time = (time.perf_counter() - start) / iterations
 
-    # Benchmark training throughput
     start = time.perf_counter()
     for _ in range(iterations):
-        out = conv.forward(X, training=True)
+        out = conv.forward(x, training=True)
         out = activation.forward(out, training=True)
         d = activation.backward(dvalues.copy())
         conv.backward(d)

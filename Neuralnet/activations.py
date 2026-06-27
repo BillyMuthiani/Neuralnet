@@ -3,12 +3,12 @@ import numpy as np
 
 class ReLU:
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
 
         if training:
-            self.input = X
+            self.input = x
 
-        return np.maximum(0, X)
+        return np.maximum(0, x)
 
     def backward(self, dvalues):
 
@@ -21,9 +21,9 @@ class ReLU:
 
 class Sigmoid:
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
 
-        output = 1 / (1 + np.exp(-X))
+        output = 1 / (1 + np.exp(-x))
 
         if training:
             self.output = output
@@ -43,9 +43,9 @@ class Sigmoid:
 
 class Tanh:
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
 
-        output = np.tanh(X)
+        output = np.tanh(x)
 
         if training:
             self.output = output
@@ -64,10 +64,10 @@ class Tanh:
 
 class Softmax:
 
-    def forward(self, X, training=True):
+    def forward(self, x, training=True):
 
         exp_values = np.exp(
-            X - np.max(X, axis=1, keepdims=True)
+            x - np.max(x, axis=1, keepdims=True)
         )
 
         output = (
@@ -93,7 +93,7 @@ class Softmax:
             single_output,
             single_dvalues
         ) in enumerate(
-            zip(self.output, dvalues)
+            zip(self.output, dvalues, strict=False)
         ):
 
             single_output = single_output.reshape(

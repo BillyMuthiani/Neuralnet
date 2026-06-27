@@ -50,27 +50,27 @@ class TestConv2D:
 
     def test_serialization(self, conv, input_data):
         output1 = conv.forward(input_data, training=True)
-        
+
         kernels_copy = conv.kernels.copy()
         biases_copy = conv.biases.copy()
-        
+
         conv.kernels[:] = 0
         conv.biases[:] = 0
-        
+
         conv.kernels = kernels_copy
         conv.biases = biases_copy
-        
+
         output2 = conv.forward(input_data, training=True)
         np.testing.assert_allclose(output1, output2)
 
     def test_gradient_check(self):
         from tests.gradient_check import check_layer_gradient, check_layer_weight_gradient
-        
+
         conv = Conv2D(filters=4, kernel_size=3, padding="same")
         input_data = np.random.randn(2, 8, 8, 3)
-        
+
         passed, _, _ = check_layer_gradient(conv, input_data, "Conv2D")
         assert passed, "Conv2D input gradient check failed"
-        
+
         passed, _, _ = check_layer_weight_gradient(conv, input_data, "Conv2D")
         assert passed, "Conv2D weight gradient check failed"
