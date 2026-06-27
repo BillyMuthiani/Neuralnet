@@ -218,6 +218,244 @@ class BatchNormalization:
         return dinputs
 
 
+def _compute_conv_output_shape(input_h, input_w, kernel_size, stride, padding):
+    """Compute output height and width for convolution."""
+    if isinstance(kernel_size, int):
+        kernel_h = kernel_w = kernel_size
+    else:
+        kernel_h, kernel_w = kernel_size
+
+    if isinstance(stride, int):
+        stride_h = stride_w = stride
+    else:
+        stride_h, stride_w = stride
+
+    if padding == "valid":
+        out_h = (input_h - kernel_h) // stride_h + 1
+        out_w = (input_w - kernel_w) // stride_w + 1
+    elif padding == "same":
+        out_h = (input_h + stride_h - 1) // stride_h
+        out_w = (input_w + stride_w - 1) // stride_w
+    else:
+        raise ValueError(f"Unknown padding: {padding}")
+
+    return out_h, out_w
+
+
+def _get_padding(padding, kernel_size, stride):
+    """Compute padding values for 'same' padding."""
+    if padding != "same":
+        return 0, 0
+
+    if isinstance(kernel_size, int):
+        kernel_h = kernel_w = kernel_size
+    else:
+        kernel_h, kernel_w = kernel_size
+
+    if isinstance(stride, int):
+        stride_h = stride_w = stride
+    else:
+        stride_h, stride_w = stride
+
+    pad_h = max((kernel_h - 1) // 2, 0)
+    pad_w = max((kernel_w - 1) // 2, 0)
+    return pad_h, pad_w
+
+
+def _pad_input(X, pad_h, pad_w):
+    """Pad input tensor with zeros."""
+    if pad_h == 0 and pad_w == 0:
+        return X
+    return np.pad(X, ((0, 0), (pad_h, pad_h), (pad_w, pad_w), (0, 0)), mode="constant")
+
+
+def _init_conv_kernel(kernel_h, kernel_w, in_channels, filters, initializer):
+    """Initialize convolution kernels with given initializer."""
+    fan_in = kernel_h * kernel_w * in_channels
+    fan_out = kernel_h * kernel_w * filters
+
+    if initializer == "he_normal":
+        std = np.sqrt(2 / fan_in)
+        return np.random.randn(kernel_h, kernel_w, in_channels, filters) * std
+    elif initializer == "xavier_uniform":
+        scale = np.sqrt(6 / (fan_in + fan_out))
+        return np.random.uniform(-scale, scale, (kernel_h, kernel_w, in_channels, filters))
+    elif initializer == "lecun_normal":
+        std = np.sqrt(1 / fan_in)
+        return np.random.randn(kernel_h, kernel_w, in_channels, filters) * std
+    else:
+        raise ValueError(
+            f"Unknown initializer: {initializer}. "
+            f"Available: he_normal, xavier_uniform, lecun_normal"
+        )
+
+
+class Conv2D:
+    """2D Convolution layer.
+
+    Applies a 2D convolution over an input tensor composed of several input
+    channels. Supports 'valid' and 'same' padding modes.
+    """
+
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        stride=1,
+        padding="valid",
+        initializer="he_normal"
+    ):
+        """Initialize the Conv2D layer.
+
+        Args:
+            filters: Number of output filters (output channels).
+            kernel_size: Size of the convolution kernel. Can be an int or
+                tuple of two ints (kernel_h, kernel_w).
+            stride: Stride of the convolution. Can be an int or tuple of
+                two ints (stride_h, stride_w). Defaults to 1.
+            padding: Padding mode, either "valid" or "same". Defaults to "valid".
+            initializer: Weight initializer. Defaults to "he_normal".
+        """
+        if padding not in ("valid", "same"):
+            raise ValueError(f"padding must be 'valid' or 'same', got '{padding}'")
+
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.initializer = initializer
+        self.kernels = None
+        self.biases = None
+        self.input = None
+        self.padded_input = None
+        self.pad_h = 0
+        self.pad_w = 0
+
+    def forward(self, X, training=True):
+        """Forward pass for 2D convolution.
+
+        Args:
+            X: Input array of shape (batch, height, width, channels).
+            training: If True, cache inputs for backward pass.
+
+        Returns:
+            Output array of shape (batch, out_h, out_w, filters).
+        """
+        batch, in_h, in_w, in_channels = X.shape
+
+        if isinstance(self.kernel_size, int):
+            kernel_h = kernel_w = self.kernel_size
+        else:
+            kernel_h, kernel_w = self.kernel_size
+
+        if isinstance(self.stride, int):
+            stride_h = stride_w = self.stride
+        else:
+            stride_h, stride_w = self.stride
+
+        # Initialize kernels if not already done
+        if self.kernels is None:
+            self.kernels = _init_conv_kernel(
+                kernel_h, kernel_w, in_channels, self.filters, self.initializer
+            )
+            self.biases = np.zeros((self.filters,))
+
+        # Compute output shape
+        out_h, out_w = _compute_conv_output_shape(
+            in_h, in_w, self.kernel_size, self.stride, self.padding
+        )
+
+        # Compute padding
+        self.pad_h, self.pad_w = _get_padding(self.padding, self.kernel_size, self.stride)
+
+        # Pad input if needed
+        if training:
+            self.input = X
+            self.padded_input = _pad_input(X, self.pad_h, self.pad_w)
+        else:
+            self.padded_input = _pad_input(X, self.pad_h, self.pad_w)
+
+        # Perform convolution using im2col approach
+        output = np.zeros((batch, out_h, out_w, self.filters))
+
+        for i in range(out_h):
+            for j in range(out_w):
+                h_start = i * stride_h
+                h_end = h_start + kernel_h
+                w_start = j * stride_w
+                w_end = w_start + kernel_w
+
+                patch = self.padded_input[:, h_start:h_end, w_start:w_end, :]
+                output[:, i, j, :] = np.tensordot(patch, self.kernels, axes=([1, 2, 3], [0, 1, 2])) + self.biases
+
+        return output
+
+    def backward(self, dvalues):
+        """Backward pass for 2D convolution.
+
+        Args:
+            dvalues: Gradient values of shape (batch, out_h, out_w, filters).
+
+        Returns:
+            Gradient with respect to inputs of shape (batch, in_h, in_w, in_channels).
+        """
+        batch, in_h, in_w, in_channels = self.input.shape
+        kernel_h, kernel_w, _, _ = self.kernels.shape
+
+        if isinstance(self.stride, int):
+            stride_h = stride_w = self.stride
+        else:
+            stride_h, stride_w = self.stride
+
+        out_h, out_w = dvalues.shape[1], dvalues.shape[2]
+
+        # Initialize gradients
+        dkernels = np.zeros_like(self.kernels)
+        dbiases = np.zeros_like(self.biases)
+        dinputs_padded = np.zeros_like(self.padded_input)
+
+        # Compute bias gradients
+        dbiases = np.sum(dvalues, axis=(0, 1, 2))
+
+        # Compute kernel and input gradients
+        for i in range(out_h):
+            for j in range(out_w):
+                h_start = i * stride_h
+                h_end = h_start + kernel_h
+                w_start = j * stride_w
+                w_end = w_start + kernel_w
+
+                patch = self.padded_input[:, h_start:h_end, w_start:w_end, :]
+
+                # Kernel gradient
+                # patch: (batch, kh, kw, c) -> dvalues: (batch, f)
+                # dkernels: (kh, kw, c, f)
+                for b in range(batch):
+                    dkernels += np.expand_dims(patch[b], -1) * np.expand_dims(dvalues[b, i, j], (0, 1, 2))
+
+                # Input gradient
+                for b in range(batch):
+                    dinputs_padded[b, h_start:h_end, w_start:w_end, :] += np.tensordot(
+                        dvalues[b, i, j], self.kernels, axes=(0, 3)
+                    )
+
+        self.dkernels = dkernels
+        self.dbiases = dbiases
+
+        # Remove padding from input gradient
+        if self.pad_h > 0 or self.pad_w > 0:
+            if self.pad_h > 0 and self.pad_w > 0:
+                dinputs = dinputs_padded[:, self.pad_h:-self.pad_h, self.pad_w:-self.pad_w, :]
+            elif self.pad_h > 0:
+                dinputs = dinputs_padded[:, self.pad_h:-self.pad_h, :, :]
+            else:
+                dinputs = dinputs_padded[:, :, self.pad_w:-self.pad_w, :]
+        else:
+            dinputs = dinputs_padded
+
+        return dinputs
+
+
 class Flatten:
     """Flatten layer for reshaping multi-dimensional inputs.
 

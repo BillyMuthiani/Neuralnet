@@ -1,5 +1,5 @@
 from Neuralnet.activations import ReLU, Sigmoid, Tanh, Softmax
-from Neuralnet.layers import Dense, Dropout, BatchNormalization, Flatten
+from Neuralnet.layers import Dense, Dropout, BatchNormalization, Flatten, Conv2D
 from Neuralnet.losses import BinaryCrossEntropy, SoftmaxCategoricalCrossEntropy, CategoricalCrossEntropy
 from Neuralnet.optimizers import SGD, Adam
 from Neuralnet.metrics import Accuracy
@@ -16,6 +16,7 @@ __all__ = [
     "Dropout",
     "BatchNormalization",
     "Flatten",
+    "Conv2D",
     "ReLU",
     "Sigmoid",
     "Tanh",
