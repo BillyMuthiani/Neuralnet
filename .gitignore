@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+
+# Models
+*.npz
+
+# Logs
+logs/
+checkpoints/
+
+# IDE
+.vscode/
+
+# Testing
+.pytest_cache/
+
+# Virtual environments
+.venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db

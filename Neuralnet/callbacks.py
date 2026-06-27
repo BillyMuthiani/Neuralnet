@@ -211,6 +211,114 @@ class CSVLogger(Callback):
             f.write(self.separator.join(values) + "\n")
 
 
+class ReduceLROnPlateau(Callback):
+    """Callback that reduces learning rate when a metric stops improving.
+
+    Monitors a specified metric and reduces the optimizer's learning rate by a factor
+    when no improvement is seen for a given number of epochs (patience).
+    """
+
+    def __init__(
+        self,
+        monitor="val_loss",
+        factor=0.5,
+        patience=5,
+        min_delta=0.0,
+        min_lr=1e-6,
+        cooldown=0,
+        mode="min",
+        verbose=True
+    ):
+        """Initialize the ReduceLROnPlateau callback.
+
+        Args:
+            monitor: Name of the metric to monitor. Defaults to "val_loss".
+            factor: Factor by which to reduce learning rate. Must be between 0 and 1.
+                Defaults to 0.5.
+            patience: Number of epochs to wait for improvement before reducing LR.
+                Defaults to 5.
+            min_delta: Minimum change to qualify as an improvement. Defaults to 0.0.
+            min_lr: Lower bound on learning rate. Defaults to 1e-6.
+            cooldown: Number of epochs to wait after LR reduction before resuming
+                normal monitoring. Defaults to 0.
+            mode: One of "min" or "max". Determines whether lower or higher metric
+                values are considered better. Defaults to "min".
+            verbose: If True, print messages when LR is reduced. Defaults to True.
+        """
+        if mode not in ("min", "max"):
+            raise ValueError(f"mode must be 'min' or 'max', got '{mode}'")
+        if factor <= 0 or factor >= 1:
+            raise ValueError(f"factor must be between 0 and 1, got {factor}")
+
+        self.monitor = monitor
+        self.factor = factor
+        self.patience = patience
+        self.min_delta = min_delta
+        self.min_lr = min_lr
+        self.cooldown = cooldown
+        self.mode = mode
+        self.verbose = verbose
+        self.best = None
+        self.wait = 0
+        self.cooldown_counter = 0
+
+    def on_epoch_end(self, epoch, logs=None):
+        """Check metric and potentially reduce learning rate.
+
+        Args:
+            epoch: Current epoch number (0-indexed).
+            logs: Dictionary containing training metrics from the current epoch.
+        """
+        if logs is None:
+            return
+
+        if self.cooldown_counter > 0:
+            self.cooldown_counter -= 1
+            return
+
+        current = logs.get(self.monitor)
+
+        if current is None:
+            return
+
+        if self.best is None:
+            self.best = current
+            self.wait = 0
+        elif self._is_improvement(current):
+            self.best = current
+            self.wait = 0
+        else:
+            self.wait += 1
+
+            if self.wait >= self.patience:
+                old_lr = self.model.optimizer.learning_rate
+                new_lr = max(old_lr * self.factor, self.min_lr)
+                self.model.optimizer.learning_rate = new_lr
+
+                if self.verbose:
+                    print(
+                        f"Epoch {epoch}: {self.monitor} did not improve for "
+                        f"{self.patience} epochs. Reducing learning rate from "
+                        f"{old_lr:.6f} to {new_lr:.6f}"
+                    )
+
+                self.wait = 0
+                self.cooldown_counter = self.cooldown
+
+    def _is_improvement(self, current):
+        """Check if current metric value is an improvement.
+
+        Args:
+            current: Current value of the monitored metric.
+
+        Returns:
+            True if the current value represents an improvement.
+        """
+        if self.mode == "min":
+            return current < self.best - self.min_delta
+        return current > self.best + self.min_delta
+
+
 class EarlyStopping(Callback):
     """Callback that stops training when a monitored metric stops improving.
 

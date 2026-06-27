@@ -1,17 +1,18 @@
 from Neuralnet.activations import ReLU, Sigmoid, Tanh, Softmax
-from Neuralnet.layers import Dense
+from Neuralnet.layers import Dense, Dropout
 from Neuralnet.losses import BinaryCrossEntropy, SoftmaxCategoricalCrossEntropy, CategoricalCrossEntropy
 from Neuralnet.optimizers import SGD, Adam
 from Neuralnet.metrics import Accuracy
 from Neuralnet.model import Sequential, History
 from Neuralnet.exceptions import NeuralnetError, ConfigurationError, NotCompiledError, ShapeError, OptimizerError
 from Neuralnet.initializers import he_normal, xavier_uniform, lecun_normal
-from Neuralnet.callbacks import Callback, EarlyStopping, ModelCheckpoint, CSVLogger
+from Neuralnet.callbacks import Callback, EarlyStopping, ModelCheckpoint, CSVLogger, ReduceLROnPlateau
 
 __version__ = "0.6.0"
 
 __all__ = [
     "Dense",
+    "Dropout",
     "ReLU",
     "Sigmoid",
     "Tanh",
@@ -36,5 +37,6 @@ __all__ = [
     "EarlyStopping",
     "ModelCheckpoint",
     "CSVLogger",
+    "ReduceLROnPlateau",
     "__version__",
 ]
