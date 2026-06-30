@@ -1,12 +1,28 @@
-from Neuralnet.activations import ReLU, Sigmoid, Tanh, Softmax
-from Neuralnet.callbacks import Callback, EarlyStopping, ModelCheckpoint, CSVLogger, ReduceLROnPlateau
-from Neuralnet.exceptions import NeuralnetError, ConfigurationError, NotCompiledError, ShapeError, OptimizerError
-from Neuralnet.initializers import he_normal, xavier_uniform, lecun_normal
-from Neuralnet.layers import Conv2D, Dense, Dropout, BatchNormalization, Flatten
-from Neuralnet.losses import BinaryCrossEntropy, CategoricalCrossEntropy, SoftmaxCategoricalCrossEntropy
+from Neuralnet.activations import ReLU, Sigmoid, Softmax, Tanh
+from Neuralnet.callbacks import (
+    Callback,
+    CSVLogger,
+    EarlyStopping,
+    ModelCheckpoint,
+    ReduceLROnPlateau,
+)
+from Neuralnet.exceptions import (
+    ConfigurationError,
+    NeuralnetError,
+    NotCompiledError,
+    OptimizerError,
+    ShapeError,
+)
+from Neuralnet.initializers import he_normal, lecun_normal, xavier_uniform
+from Neuralnet.layers import BatchNormalization, Conv2D, Dense, Dropout, Flatten
+from Neuralnet.losses import (
+    BinaryCrossEntropy,
+    CategoricalCrossEntropy,
+    SoftmaxCategoricalCrossEntropy,
+)
 from Neuralnet.metrics import Accuracy
 from Neuralnet.model import History, Sequential
-from Neuralnet.optimizers import Adam, SGD
+from Neuralnet.optimizers import SGD, Adam
 from Neuralnet.regularizers import L2
 
 __version__ = "0.6.0"

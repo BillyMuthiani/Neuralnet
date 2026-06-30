@@ -1,5 +1,6 @@
 import numpy as np
-from Neuralnet.initializers import he_normal, xavier_uniform, lecun_normal
+
+from Neuralnet.initializers import he_normal, lecun_normal, xavier_uniform
 
 
 class Dense:

@@ -421,7 +421,7 @@ class EarlyStopping(Callback):
             weights: List of (weights, biases) tuples to restore.
         """
         for layer, weight_data in zip(
-            [l for l in self.model.layers if hasattr(l, "weights")],
+            [layer for layer in self.model.layers if hasattr(layer, "weights")],
             weights,
             strict=False
         ):

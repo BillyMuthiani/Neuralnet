@@ -1,6 +1,8 @@
 """Benchmark Dense layer forward and backward pass performance."""
 import time
+
 import numpy as np
+
 from Neuralnet import Dense, ReLU
 
 

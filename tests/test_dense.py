@@ -1,6 +1,7 @@
-import pytest
 import numpy as np
-from Neuralnet import Dense, ReLU, Softmax
+import pytest
+
+from Neuralnet import Dense
 
 
 class TestDense:
@@ -32,10 +33,10 @@ class TestDense:
         dense.forward(input_data, training=True)
         dout = np.ones((2, 8))
         dense.backward(dout)
-        
+
         expected_dweights = np.dot(input_data.T, dout)
         expected_dbiases = np.sum(dout, axis=0, keepdims=True)
-        
+
         np.testing.assert_allclose(dense.dweights, expected_dweights)
         np.testing.assert_allclose(dense.dbiases, expected_dbiases)
 
@@ -45,12 +46,12 @@ class TestDense:
         dense_reg.forward(input_data, training=True)
         dout = np.ones((2, 8))
         dense_reg.backward(dout)
-        
+
         expected_reg_loss = 0.01 * np.sum(dense_reg.weights ** 2)
         expected_reg_grad = 2 * 0.01 * dense_reg.weights
-        
+
         assert np.isclose(dense_reg.regularization_loss, expected_reg_loss)
-        
+
         # Check that dweights includes regularizer gradient
         # dweights should equal weights_grad + regularizer_grad
         expected_dweights = np.dot(input_data.T, dout) + expected_reg_grad
@@ -58,28 +59,28 @@ class TestDense:
 
     def test_serialization(self, dense, input_data):
         dense.forward(input_data, training=True)
-        
+
         # Save weights
         weights_copy = dense.weights.copy()
         biases_copy = dense.biases.copy()
-        
+
         # Modify
         dense.weights[:] = 0
         dense.biases[:] = 0
-        
+
         # Restore
         dense.weights = weights_copy
         dense.biases = biases_copy
-        
+
         output = dense.forward(input_data, training=True)
         expected = np.dot(input_data, weights_copy) + biases_copy
         np.testing.assert_allclose(output, expected)
 
     def test_gradient_check(self, dense, input_data):
         from tests.gradient_check import check_layer_gradient, check_layer_weight_gradient
-        
+
         passed, _, _ = check_layer_gradient(dense, input_data, "Dense")
         assert passed, "Dense input gradient check failed"
-        
+
         passed, _, _ = check_layer_weight_gradient(dense, input_data, "Dense")
         assert passed, "Dense weight gradient check failed"

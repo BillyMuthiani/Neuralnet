@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 from Neuralnet import Dropout
 
 
@@ -20,9 +21,6 @@ class TestDropout:
         # During training, some elements should be zeroed
         # and remaining should be scaled by 1/(1-rate)
         assert np.any(output == 0)
-        # Non-zero elements should be scaled
-        non_zero = output[output != 0]
-        expected_scale = 1 / (1 - 0.3)
         # Check that non-zero values are approximately scaled
         # (This is probabilistic, so we just check it runs)
 
@@ -83,5 +81,7 @@ class TestDropout:
         input_data = np.random.randn(2, 10)
 
         # In inference mode, dropout is identity
-        passed, _, _ = check_layer_gradient(dropout, input_data, "Dropout (inference)", training=False)
+        passed, _, _ = check_layer_gradient(
+             dropout, input_data, "Dropout (inference)", training=False
+         )
         assert passed, "Dropout inference gradient check failed"

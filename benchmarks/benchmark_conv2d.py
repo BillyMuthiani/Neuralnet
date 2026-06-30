@@ -1,6 +1,8 @@
 """Benchmark Conv2D layer forward and backward pass performance."""
 import time
+
 import numpy as np
+
 from Neuralnet import Conv2D, ReLU
 
 

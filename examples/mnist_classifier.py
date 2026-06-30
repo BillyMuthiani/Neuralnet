@@ -1,12 +1,13 @@
+import numpy as np
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
-from Neuralnet.model import Sequential
-from Neuralnet.layers import Dense
+
 from Neuralnet.activations import ReLU, Softmax
+from Neuralnet.layers import Dense
 from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
-from Neuralnet.optimizers import Adam
 from Neuralnet.metrics import Accuracy
-import numpy as np
+from Neuralnet.model import Sequential
+from Neuralnet.optimizers import Adam
 
 digits = load_digits()
 

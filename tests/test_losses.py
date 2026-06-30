@@ -1,6 +1,7 @@
-import pytest
 import numpy as np
-from Neuralnet.losses import SoftmaxCategoricalCrossEntropy, BinaryCrossEntropy
+import pytest
+
+from Neuralnet.losses import BinaryCrossEntropy, SoftmaxCategoricalCrossEntropy
 
 
 class TestSoftmaxCategoricalCrossEntropy:

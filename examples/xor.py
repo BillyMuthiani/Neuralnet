@@ -1,11 +1,11 @@
 import numpy as np
 
-from Neuralnet.model import Sequential
-from Neuralnet.layers import Dense
 from Neuralnet.activations import ReLU, Sigmoid
+from Neuralnet.layers import Dense
 from Neuralnet.losses import BinaryCrossEntropy
-from Neuralnet.optimizers import SGD
 from Neuralnet.metrics import Accuracy
+from Neuralnet.model import Sequential
+from Neuralnet.optimizers import SGD
 
 # XOR dataset
 x = np.array([
@@ -22,9 +22,9 @@ print(f"Target shape: {y.shape}")
 
 # Build model
 model = Sequential()
-model.add(Dense(2, 4))
+model.add(Dense(2, 8))
 model.add(ReLU())
-model.add(Dense(4, 1))
+model.add(Dense(8, 1))
 model.add(Sigmoid())
 
 model.compile(

@@ -1,11 +1,11 @@
 import numpy as np
 
-from Neuralnet.model import Sequential
-from Neuralnet.layers import Dense, Flatten
 from Neuralnet.activations import ReLU, Softmax
+from Neuralnet.layers import Dense, Flatten
 from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
-from Neuralnet.optimizers import Adam
 from Neuralnet.metrics import Accuracy
+from Neuralnet.model import Sequential
+from Neuralnet.optimizers import Adam
 
 # Generate synthetic image-like data for demonstration
 # 100 samples, 2x2 "images" (4 pixels), 3 classes

@@ -1,12 +1,11 @@
 import numpy as np
 
-from Neuralnet.layers import Dense
 from Neuralnet.activations import Sigmoid, Tanh
+from Neuralnet.layers import Dense
 from Neuralnet.losses import BinaryCrossEntropy
 from Neuralnet.metrics import Accuracy
-from Neuralnet.optimizers import Adam
-
 from Neuralnet.model import Sequential
+from Neuralnet.optimizers import Adam
 
 x = np.array([
     [0, 0],

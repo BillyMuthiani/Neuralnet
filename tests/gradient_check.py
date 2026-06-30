@@ -1,5 +1,6 @@
+from collections.abc import Callable
+
 import numpy as np
-from typing import Callable, Tuple
 
 
 def numerical_gradient(
@@ -43,7 +44,7 @@ def check_gradient(
     numerical_grad: np.ndarray,
     tolerance: float = 1e-5,
     name: str = "Gradient"
-) -> Tuple[bool, float, float]:
+) -> tuple[bool, float, float]:
     """Compare analytical and numerical gradients.
 
     Args:
@@ -64,7 +65,11 @@ def check_gradient(
 
     passed = max_rel_error < tolerance
 
-    print(f"  {name}: max_abs={max_abs_error:.6e}, max_rel={max_rel_error:.6e} -> {'PASS' if passed else 'FAIL'}")
+    status = 'PASS' if passed else 'FAIL'
+    print(
+        f"  {name}: max_abs={max_abs_error:.6e}, "
+        f"max_rel={max_rel_error:.6e} -> {status}"
+    )
 
     return passed, max_abs_error, max_rel_error
 
@@ -76,7 +81,7 @@ def check_layer_gradient(
     eps: float = 1e-7,
     tolerance: float = 1e-5,
     training: bool = True
-) -> Tuple[bool, float, float]:
+) -> tuple[bool, float, float]:
     """Check gradients for a layer with scalar loss function.
 
     Uses sum of outputs as scalar loss: loss = sum(forward(x))
@@ -124,7 +129,7 @@ def check_layer_weight_gradient(
     eps: float = 1e-7,
     tolerance: float = 1e-5,
     training: bool = True
-) -> Tuple[bool, float, float]:
+) -> tuple[bool, float, float]:
     """Check gradients for layer weights (if applicable).
 
     Args:
@@ -176,7 +181,7 @@ def check_regularizer_gradient(
     eps: float = 1e-7,
     tolerance: float = 1e-5,
     name: str = "Regularizer"
-) -> Tuple[bool, float, float]:
+) -> tuple[bool, float, float]:
     """Check gradients for a regularizer.
 
     Args:
@@ -205,7 +210,7 @@ def check_regularizer_gradient(
 
 def run_gradient_checks():
     """Run all gradient checks for the framework."""
-    from Neuralnet import Dense, Conv2D, BatchNormalization, Dropout
+    from Neuralnet import Conv2D, Dense, Dropout
     from Neuralnet.regularizers import L2
 
     np.random.seed(42)
@@ -234,14 +239,15 @@ def run_gradient_checks():
     all_passed &= passed
 
     print("\n3. BatchNormalization Layer")
-    bn = BatchNormalization()
     x = np.random.randn(4, 8)
     print("  BatchNormalization: SKIPPED (complex batch statistics)")
 
     print("\n4. Dropout Layer (inference)")
     dropout = Dropout(rate=0.3)
     x = np.random.randn(2, 10)
-    passed, _, _ = check_layer_gradient(dropout, x, "Dropout (inference)", training=False)
+    passed, _, _ = check_layer_gradient(
+        dropout, x, "Dropout (inference)", training=False
+    )
     all_passed &= passed
 
     print("\n5. L2 Regularizer")

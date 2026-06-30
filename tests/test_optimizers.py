@@ -1,8 +1,8 @@
-import pytest
 import numpy as np
-from Neuralnet.optimizers import Adam, SGD
+import pytest
+
 from Neuralnet.layers import Dense
-from Neuralnet.initializers import he_normal
+from Neuralnet.optimizers import SGD, Adam
 
 
 class TestSGD:
