@@ -6,7 +6,7 @@
 [![Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://docs.astral.sh/ruff/)
 [![mypy](https://img.shields.io/badge/types-mypy-blue.svg)](https://mypy-lang.org/)
 
-A lightweight deep learning framework built from scratch using NumPy.
+A lightweight deep learning framework built from first principles using NumPy.
 
 ## Features
 
