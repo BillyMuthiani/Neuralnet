@@ -1,6 +1,6 @@
 import numpy as np
 
-from Neuralnet import (
+from kronyx import (
     SGD,
     Accuracy,
     BinaryCrossEntropy,

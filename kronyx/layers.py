@@ -1,6 +1,6 @@
 import numpy as np
 
-from Neuralnet.initializers import he_normal, lecun_normal, xavier_uniform
+from kronyx.initializers import he_normal, lecun_normal, xavier_uniform
 
 
 class Dense:

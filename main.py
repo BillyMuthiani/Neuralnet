@@ -1,11 +1,11 @@
 import numpy as np
 
-from Neuralnet.activations import Sigmoid, Tanh
-from Neuralnet.layers import Dense
-from Neuralnet.losses import BinaryCrossEntropy
-from Neuralnet.metrics import Accuracy
-from Neuralnet.model import Sequential
-from Neuralnet.optimizers import Adam
+from kronyx.activations import Sigmoid, Tanh
+from kronyx.layers import Dense
+from kronyx.losses import BinaryCrossEntropy
+from kronyx.metrics import Accuracy
+from kronyx.model import Sequential
+from kronyx.optimizers import Adam
 
 x = np.array([
     [0, 0],

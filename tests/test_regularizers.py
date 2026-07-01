@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from Neuralnet.regularizers import L2
+from kronyx.regularizers import L2
 
 
 class TestL2Regularizer:

@@ -210,8 +210,8 @@ def check_regularizer_gradient(
 
 def run_gradient_checks():
     """Run all gradient checks for the framework."""
-    from Neuralnet import Conv2D, Dense, Dropout
-    from Neuralnet.regularizers import L2
+    from kronyx import Conv2D, Dense, Dropout
+    from kronyx.regularizers import L2
 
     np.random.seed(42)
     all_passed = True

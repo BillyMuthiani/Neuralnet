@@ -12,7 +12,7 @@ Brief description of the change.
 ## Testing
 
 - [ ] Tests pass locally (`pytest tests/ -v`)
-- [ ] Coverage maintained (`pytest --cov=Neuralnet`)
+- [ ] Coverage maintained (`pytest --cov=kronyx`)
 - [ ] Code is linted (`ruff check .`)
 
 ## Checklist

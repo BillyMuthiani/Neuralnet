@@ -1,1 +1,1 @@
-# Tests module for Neuralnet framework
+# Tests module for Kronyx framework

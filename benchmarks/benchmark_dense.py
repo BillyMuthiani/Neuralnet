@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 
-from Neuralnet import Dense, ReLU
+from kronyx import Dense, ReLU
 
 
 def benchmark_dense(

@@ -9,13 +9,13 @@
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities by emailing security@neuralnet.ai.
+Please report security vulnerabilities by emailing security@kronyx.ai.
 
 We strive to respond to all reports within 7 days.
 
 ## Security Best Practices
 
-When using Neuralnet:
+When using Kronyx:
 
 - Sanitize input data before training
 - Validate model weights before loading

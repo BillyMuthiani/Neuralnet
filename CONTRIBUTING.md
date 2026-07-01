@@ -1,6 +1,6 @@
-# Contributing to Neuralnet
+# Contributing to Kronyx
 
-Thank you for your interest in contributing to Neuralnet! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Kronyx! This document provides guidelines and instructions for contributing.
 
 ## How to Contribute
 
@@ -24,7 +24,7 @@ This installs the package in development mode along with all development depende
 
 ```bash
 pytest tests/ -v
-pytest --cov=Neuralnet
+pytest --cov=kronyx
 ```
 
 ## Code Style
@@ -40,7 +40,7 @@ ruff check .
 This project uses [mypy](https://mypy-lang.org/) for type checking:
 
 ```bash
-mypy Neuralnet
+mypy kronyx
 ```
 
 ## Code of Conduct

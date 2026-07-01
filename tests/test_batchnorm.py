@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from Neuralnet import BatchNormalization
+from kronyx import BatchNormalization
 
 
 class TestBatchNormalization:

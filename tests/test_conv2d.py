@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from Neuralnet import Conv2D
+from kronyx import Conv2D
 
 
 class TestConv2D:

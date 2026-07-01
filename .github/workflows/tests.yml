@@ -46,7 +46,7 @@ jobs:
         run: ruff check .
 
       - name: Run mypy
-        run: mypy Neuralnet
+        run: mypy kronyx
 
   tests:
     name: Python ${{ matrix.python-version }}
@@ -75,5 +75,5 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest --cov=Neuralnet --cov-report=xml
+          pytest --cov=kronyx --cov-report=xml
 

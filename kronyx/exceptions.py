@@ -1,9 +1,12 @@
-class NeuralnetError(Exception):
-    """Base exception for all Neuralnet errors."""
+class KronyxError(Exception):
+    """Base exception for all Kronyx errors."""
     pass
 
 
-class ConfigurationError(NeuralnetError):
+NeuralnetError = KronyxError
+
+
+class ConfigurationError(KronyxError):
     """Raised when model configuration is invalid."""
     pass
 
@@ -13,11 +16,11 @@ class NotCompiledError(ConfigurationError):
     pass
 
 
-class ShapeError(NeuralnetError):
+class ShapeError(KronyxError):
     """Raised when tensor shapes are incompatible."""
     pass
 
 
-class OptimizerError(NeuralnetError):
+class OptimizerError(KronyxError):
     """Raised when optimizer operations fail."""
     pass

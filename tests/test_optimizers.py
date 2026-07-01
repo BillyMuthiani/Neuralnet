@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from Neuralnet.layers import Dense
-from Neuralnet.optimizers import SGD, Adam
+from kronyx.layers import Dense
+from kronyx.optimizers import SGD, Adam
 
 
 class TestSGD:

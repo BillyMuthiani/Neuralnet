@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 
-from Neuralnet.exceptions import NotCompiledError
+from kronyx.exceptions import NotCompiledError
 
 
 class History:
@@ -89,7 +89,7 @@ class Sequential:
 
     def save(self, filename):
         """Save model weights to a file."""
-        from Neuralnet.serialization import save
+        from kronyx.serialization import save
         save(self, filename)
 
     def save_weights(self, filename):
@@ -98,12 +98,12 @@ class Sequential:
         Args:
             filename: Path where weights will be saved.
         """
-        from Neuralnet.serialization import save
+        from kronyx.serialization import save
         save(self, filename)
 
     def load(self, filename):
         """Load model weights from a file."""
-        from Neuralnet.serialization import load
+        from kronyx.serialization import load
         load(self, filename)
 
     def fit(

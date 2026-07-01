@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug in Neuralnet
+about: Report a bug in Kronyx
 title: ''
 labels: bug
 assignees: ''
@@ -13,7 +13,7 @@ A clear and concise description of what the bug is.
 ## To Reproduce
 
 Steps to reproduce:
-1. Import Neuralnet
+1. Import Kronyx
 2. Run code
 3. Expected vs actual behavior
 

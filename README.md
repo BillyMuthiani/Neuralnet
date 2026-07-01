@@ -1,20 +1,14 @@
-# Neuralnet
+# Kronyx
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-A lightweight deep learning framework built from scratch in NumPy, implementing neural networks, backpropagation, optimizers, and automatic differentiation without TensorFlow or PyTorch.
+Kronyx is a lightweight deep learning framework built entirely from scratch using NumPy. It is designed for learning, experimentation, research, and understanding how modern neural networks work under the hood.
 
 ## Installation
 
 ```bash
-pip install Neuralnet
-```
-
-For development:
-
-```bash
-pip install -e ".[dev]"
+pip install kronyx
 ```
 
 For development:
@@ -27,9 +21,9 @@ pip install -e ".[dev]"
 
 ```python
 import numpy as np
-from Neuralnet import Sequential, Dense, ReLU, Softmax
-from Neuralnet.losses import SoftmaxCategoricalCrossEntropy
-from Neuralnet.optimizers import Adam
+from kronyx import Sequential, Dense, ReLU, Softmax
+from kronyx.losses import SoftmaxCategoricalCrossEntropy
+from kronyx.optimizers import Adam
 
 # Build model
 model = Sequential()
@@ -88,7 +82,7 @@ history = model.fit(
 - **ReduceLROnPlateau**: Reduce learning rate when plateau detected
 
 ```python
-from Neuralnet import EarlyStopping, ModelCheckpoint
+from kronyx import EarlyStopping, ModelCheckpoint
 
 model.fit(
     X_train, y_train,
@@ -125,7 +119,7 @@ model.load("model.npz")
 
 ```bash
 pytest tests/ -v
-pytest --cov=Neuralnet
+pytest --cov=kronyx
 ```
 
 Coverage: <!-- codecov -->

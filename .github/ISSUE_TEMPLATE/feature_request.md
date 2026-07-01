@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a feature for Neuralnet
+about: Suggest a feature for Kronyx
 title: ''
 labels: enhancement
 assignees: ''

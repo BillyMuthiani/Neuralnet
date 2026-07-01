@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from Neuralnet import Dense
+from kronyx import Dense
 
 
 class TestDense:
@@ -41,7 +41,7 @@ class TestDense:
         np.testing.assert_allclose(dense.dbiases, expected_dbiases)
 
     def test_kernel_regularizer(self, dense, input_data):
-        from Neuralnet.regularizers import L2
+        from kronyx.regularizers import L2
         dense_reg = Dense(4, 8, initializer="he_normal", kernel_regularizer=L2(0.01))
         dense_reg.forward(input_data, training=True)
         dout = np.ones((2, 8))

@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 
-from Neuralnet import Conv2D, ReLU
+from kronyx import Conv2D, ReLU
 
 
 def benchmark_conv2d(

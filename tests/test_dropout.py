@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from Neuralnet import Dropout
+from kronyx import Dropout
 
 
 class TestDropout:
