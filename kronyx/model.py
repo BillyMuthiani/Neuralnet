@@ -89,6 +89,7 @@ class History:
             filepath: Path to save the CSV file.
         """
         import csv
+
         with open(filepath, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow([
@@ -237,7 +238,6 @@ class Sequential:
         print("=" * 60)
 
         total_params = 0
-        input_shape = None
 
         for i, layer in enumerate(self.layers):
             layer_name = type(layer).__name__
@@ -248,8 +248,6 @@ class Sequential:
             else:
                 params = 0
                 output_shape = '(None, ?)'
-            if input_shape is None and hasattr(layer, 'output_shape'):
-                input_shape = layer.output_shape
 
             print(f"{layer_name}{i}<->{'':<15} {str(output_shape):<20} {params:<10}")
 
@@ -441,7 +439,7 @@ class Sequential:
                 for callback in callbacks:
                     callback.on_batch_end(batch_idx, logs)
 
-avg_loss = epoch_loss / num_batches
+            avg_loss = epoch_loss / num_batches
 
             history.loss.append(avg_loss)
             history.epochs.append(epoch)
@@ -453,22 +451,24 @@ avg_loss = epoch_loss / num_batches
                 history.accuracy.append(avg_accuracy)
                 logs["accuracy"] = avg_accuracy
 
-            val_loss = None
-            val_accuracy = None
+            val_loss_val = None
+            val_accuracy_val = None
             if validation_data is not None:
 
                 x_val, y_val = validation_data
-                val_loss = self.loss_function.forward(y_val, self.forward(x_val, training=False))
-                history.val_loss.append(val_loss)
-                logs["val_loss"] = val_loss
+                val_pred = self.forward(x_val, training=False)
+                val_loss_val = self.loss_function.forward(y_val, val_pred)
+                history.val_loss.append(val_loss_val)
+                logs["val_loss"] = val_loss_val
 
                 if self.metric:
-                    val_accuracy = self.metric.calculate(y_val, self.forward(x_val, training=False))
-                    history.val_accuracy.append(val_accuracy)
-                    logs["val_accuracy"] = val_accuracy
+                    val_accuracy_val = self.metric.calculate(y_val, val_pred)
+                    history.val_accuracy.append(val_accuracy_val)
+                    logs["val_accuracy"] = val_accuracy_val
 
             logs["epoch"] = epoch
 
+            lr = None
             if self.optimizer is not None:
                 lr = getattr(
                     self.optimizer,
@@ -486,9 +486,7 @@ avg_loss = epoch_loss / num_batches
 
             if verbose > 0:
                 self._print_epoch(epoch, epochs, avg_loss, avg_accuracy,
-                                   val_loss if validation_data else None,
-                                   val_accuracy if validation_data else None,
-                                   lr)
+                                   val_loss_val, val_accuracy_val, lr)
 
         for callback in callbacks:
             callback.on_train_end(logs)
@@ -496,7 +494,7 @@ avg_loss = epoch_loss / num_batches
         return history
 
     def _print_epoch(self, epoch, epochs, loss, accuracy,
-                      val_loss=None, val_accuracy=None, lr=None):
+                       val_loss=None, val_accuracy=None, lr=None):
         """Print epoch progress with formatted metrics.
 
         Args:
