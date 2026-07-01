@@ -24,8 +24,7 @@ from kronyx.metrics import Accuracy
 from kronyx.model import History, Sequential
 from kronyx.optimizers import SGD, Adam
 from kronyx.regularizers import L2
-
-__version__ = "0.6.0"
+from kronyx.version import __version__
 
 __all__ = [
     "Dense",

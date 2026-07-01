@@ -1,9 +1,21 @@
 # Kronyx
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/Kronyx/kronyx/actions/workflows/tests.yml/badge.svg)](https://github.com/Kronyx/kronyx/actions/workflows/tests.yml)
+[![Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://docs.astral.sh/ruff/)
+[![mypy](https://img.shields.io/badge/types-mypy-blue.svg)](https://mypy-lang.org/)
 
-Kronyx is a lightweight deep learning framework built entirely from scratch using NumPy. It is designed for learning, experimentation, research, and understanding how modern neural networks work under the hood.
+A lightweight deep learning framework built from scratch using NumPy.
+
+## Features
+
+- **Layers**: Dense, Conv2D, BatchNormalization, Dropout, Flatten
+- **Optimizers**: SGD, Adam
+- **Callbacks**: EarlyStopping, ModelCheckpoint, CSVLogger, ReduceLROnPlateau
+- **Serialization**: Save/load model weights
+- **NumPy backend**: Pure NumPy implementation, no external ML dependencies
+- **Gradient checking**: Built-in utilities for verifying gradient correctness
 
 ## Installation
 
@@ -14,6 +26,8 @@ pip install kronyx
 For development:
 
 ```bash
+git clone https://github.com/Kronyx/kronyx.git
+cd kronyx
 pip install -e ".[dev]"
 ```
 
@@ -21,123 +35,84 @@ pip install -e ".[dev]"
 
 ```python
 import numpy as np
-from kronyx import Sequential, Dense, ReLU, Softmax
-from kronyx.losses import SoftmaxCategoricalCrossEntropy
-from kronyx.optimizers import Adam
+from kronyx import Sequential, Dense, ReLU, Sigmoid, BinaryCrossEntropy, Adam, Accuracy
 
-# Build model
+# XOR problem - binary classification
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([[0], [1], [1], [0]])
+
 model = Sequential()
-model.add(Dense(4, 16))
+model.add(Dense(2, 8))  # input_size=2, hidden_size=8
 model.add(ReLU())
-model.add(Dense(16, 3))
-model.add(Softmax())
+model.add(Dense(8, 1))
+model.add(Sigmoid())
 
 model.compile(
-    loss=SoftmaxCategoricalCrossEntropy(),
-    optimizer=Adam(learning_rate=0.001)
-)
-
-# Train
-model.fit(X_train, y_train, epochs=100)
-
-# Predict
-predictions = model.predict(X_test)
-```
-
-## Sequential API
-
-```python
-model = Sequential()
-model.add(Dense(input_size, hidden_size))
-model.add(ReLU())
-model.add(Dense(hidden_size, output_size))
-model.add(Softmax())
-```
-
-## Training
-
-```python
-model.compile(
-    loss=SoftmaxCategoricalCrossEntropy(),
-    optimizer=Adam(learning_rate=0.001),
+    loss=BinaryCrossEntropy(),
+    optimizer=Adam(learning_rate=0.1),
     metric=Accuracy()
 )
 
-history = model.fit(
-    X_train,
-    y_train,
-    epochs=100,
-    batch_size=32,
-    shuffle=True,
-    validation_data=(X_val, y_val),
-    callbacks=[EarlyStopping(patience=10)]
-)
-```
-
-## Callbacks
-
-- **EarlyStopping**: Stop training when monitored metric stops improving
-- **ModelCheckpoint**: Save model when monitored metric improves
-- **CSVLogger**: Log training metrics to CSV
-- **ReduceLROnPlateau**: Reduce learning rate when plateau detected
-
-```python
-from kronyx import EarlyStopping, ModelCheckpoint
-
-model.fit(
-    X_train, y_train,
-    epochs=1000,
-    callbacks=[
-        EarlyStopping(patience=50),
-        ModelCheckpoint("best_model.npz")
-    ]
-)
-```
-
-## Saving & Loading
-
-```python
-# Save
-model.save("model.npz")
-
-# Load
-model.load("model.npz")
+model.fit(X, y, epochs=1000)
+predictions = model.predict(X)
+print(f"Accuracy: {(predictions.round() == y).mean():.2%}")
 ```
 
 ## Examples
 
 - `examples/xor.py` - XOR problem with binary classification
-- `examples/iris_classification.py` - Iris dataset classification
+- `examples/iris_classification.py` - Iris dataset multi-class classification
 - `examples/iris_dropout.py` - Dropout regularization example
 - `examples/iris_l2.py` - L2 weight regularization
-- `examples/batchnorm_iris.py` - Batch normalization
+- `examples/batchnorm_iris.py` - Batch normalization demonstration
 - `examples/flatten_demo.py` - Multi-dimensional input handling
-- `examples/conv2d_demo.py` - Convolutional neural network
+- `examples/conv2d_demo.py` - Convolutional neural network example
 - `examples/mnist_classifier.py` - MNIST digit classification
 
-## Testing
+## API Overview
 
-```bash
-pytest tests/ -v
-pytest --cov=kronyx
+```python
+from kronyx import (
+    Sequential,
+    Dense,
+    Conv2D,
+    Flatten,
+    Dropout,
+    BatchNormalization,
+    ReLU,
+    Sigmoid,
+    Tanh,
+    Softmax,
+    BinaryCrossEntropy,
+    SoftmaxCategoricalCrossEntropy,
+    Adam,
+    Accuracy,
+)
 ```
 
-Coverage: <!-- codecov -->
+## Documentation
 
-## Benchmarks
-
-```bash
-python benchmarks/benchmark_dense.py
-python benchmarks/benchmark_conv2d.py
 ```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+kronyx/
+├── activations.py    # ReLU, Sigmoid, Tanh, Softmax
+├── layers.py         # Dense, Conv2D, Flatten, Dropout, BatchNormalization
+├── model.py          # Sequential, History
+├── optimizers.py     # SGD, Adam
+├── losses.py         # BinaryCrossEntropy, CategoricalCrossEntropy
+├── metrics.py        # Accuracy
+├── callbacks.py      # Callback base, EarlyStopping, etc.
+├── regularizers.py   # L2
+├── initializers.py   # he_normal, xavier_uniform, lecun_normal
+└── exceptions.py     # Error types
+```
 
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md) for planned features.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
 ## License
 

@@ -1,3 +1,7 @@
+"""Flatten layer demonstration with multi-dimensional input.
+
+Demonstrates handling 2D input data (e.g., images) using the Flatten layer.
+"""
 import numpy as np
 
 from kronyx import (
@@ -11,8 +15,6 @@ from kronyx import (
     SoftmaxCategoricalCrossEntropy,
 )
 
-# Generate synthetic image-like data for demonstration
-# 100 samples, 2x2 "images" (4 pixels), 3 classes
 np.random.seed(42)
 
 x_train = np.random.randn(100, 2, 2)
@@ -23,17 +25,14 @@ y_test = np.random.randint(0, 3, 20)
 
 print(f'Input shape: {x_train.shape}')
 
-# Build Model with Flatten layer
 model = Sequential()
 
-# Flatten expects (batch, height, width) -> (batch, features)
 model.add(Flatten())
 model.add(Dense(4, 8))
 model.add(ReLU())
 model.add(Dense(8, 3))
 model.add(Softmax())
 
-# Train
 model.compile(
     loss=SoftmaxCategoricalCrossEntropy(),
     optimizer=Adam(learning_rate=0.01),
@@ -43,10 +42,9 @@ model.compile(
 model.fit(
     x_train,
     y_train,
-    epochs=100
+    epochs=100,
 )
 
-# Evaluate
 predictions = model.predict(x_test)
 
 predicted_classes = np.argmax(
@@ -62,5 +60,4 @@ print(
     f"Test Accuracy: {accuracy:.4f}"
 )
 
-# Demonstrate inference doesn't cache
 print(f'Flatten shape cached: {model.layers[0].input_shape}')
