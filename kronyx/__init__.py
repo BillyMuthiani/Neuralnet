@@ -24,6 +24,7 @@ from kronyx.metrics import Accuracy
 from kronyx.model import History, Sequential
 from kronyx.optimizers import SGD, Adam
 from kronyx.regularizers import L2
+from kronyx.utils import set_seed
 from kronyx.version import __version__
 
 __all__ = [
@@ -58,5 +59,6 @@ __all__ = [
     "CSVLogger",
     "ReduceLROnPlateau",
     "L2",
+    "set_seed",
     "__version__",
 ]

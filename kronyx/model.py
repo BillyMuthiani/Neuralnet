@@ -1,3 +1,4 @@
+"""Model implementation with Sequential API and training utilities."""
 import warnings
 
 import numpy as np
@@ -6,12 +7,24 @@ from kronyx.exceptions import NotCompiledError
 
 
 class History:
+    """Training history container with metrics and utility methods.
+
+    Stores loss and accuracy values for training and validation across epochs.
+
+    Examples:
+        >>> history = History()
+        >>> history.loss.append(0.5)
+        >>> history.summary()
+        'loss: 0.5000'
+    """
 
     def __init__(self):
         self.loss = []
         self.accuracy = []
         self.val_loss = []
         self.val_accuracy = []
+        self.learning_rate = []
+        self.epochs = []
 
     def __getitem__(self, key):
         if key == "loss":
@@ -22,6 +35,10 @@ class History:
             return self.val_loss
         elif key == "val_accuracy":
             return self.val_accuracy
+        elif key == "learning_rate":
+            return self.learning_rate
+        elif key == "epochs":
+            return self.epochs
         raise KeyError(key)
 
     def __setitem__(self, key, value):
@@ -33,6 +50,10 @@ class History:
             self.val_loss = value
         elif key == "val_accuracy":
             self.val_accuracy = value
+        elif key == "learning_rate":
+            self.learning_rate = value
+        elif key == "epochs":
+            self.epochs = value
         else:
             raise KeyError(key)
 
@@ -42,39 +63,152 @@ class History:
             ("accuracy", self.accuracy),
             ("val_loss", self.val_loss),
             ("val_accuracy", self.val_accuracy),
+            ("learning_rate", self.learning_rate),
+            ("epochs", self.epochs),
         ]
+
+    def to_dict(self):
+        """Convert history to a dictionary.
+
+        Returns:
+            Dictionary with all metric lists.
+        """
+        return {
+            "loss": self.loss,
+            "accuracy": self.accuracy,
+            "val_loss": self.val_loss,
+            "val_accuracy": self.val_accuracy,
+            "learning_rate": self.learning_rate,
+            "epochs": self.epochs,
+        }
+
+    def to_csv(self, filepath):
+        """Save history to CSV file.
+
+        Args:
+            filepath: Path to save the CSV file.
+        """
+        import csv
+        with open(filepath, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "epoch", "loss", "accuracy",
+                "val_loss", "val_accuracy", "learning_rate"
+            ])
+            for i in range(len(self.epochs)):
+                writer.writerow([
+                    self.epochs[i] if self.epochs else i,
+                    self.loss[i] if i < len(self.loss) else "",
+                    self.accuracy[i] if i < len(self.accuracy) else "",
+                    self.val_loss[i] if i < len(self.val_loss) else "",
+                    self.val_accuracy[i] if i < len(self.val_accuracy) else "",
+                    self.learning_rate[i] if i < len(self.learning_rate) else "",
+                ])
+
+    def summary(self):
+        """Return a summary string of the training history.
+
+        Returns:
+            String with final metrics summary.
+        """
+        lines = []
+        if self.loss:
+            lines.append(f"loss: {self.loss[-1]:.4f}")
+        if self.accuracy:
+            lines.append(f"accuracy: {self.accuracy[-1]*100:.1f}%")
+        if self.val_loss:
+            lines.append(f"val_loss: {self.val_loss[-1]:.4f}")
+        if self.val_accuracy:
+            lines.append(f"val_accuracy: {self.val_accuracy[-1]*100:.1f}%")
+        return "\n".join(lines)
 
 
 class Sequential:
+    """Sequential neural network model with Keras-like API.
+
+    Example:
+        >>> model = Sequential()
+        >>> model.add(Dense(4, 16))
+        >>> model.add(ReLU())
+        >>> model.compile(loss=BinaryCrossEntropy(), optimizer=Adam())
+        >>> history = model.fit(x, y, epochs=100)
+    """
 
     def __init__(self):
-
         self.layers = []
         self.optimizer = None
         self.loss_function = None
         self.metric = None
 
     def add(self, layer):
+        """Add a layer to the model.
 
+        Args:
+            layer: Layer instance to add.
+        """
         self.layers.append(layer)
 
     def forward(self, x, training=True):
+        """Forward pass through all layers.
 
+        Args:
+            x: Input data.
+            training: If True, layers may cache values for backward.
+
+        Returns:
+            Output after passing through all layers.
+        """
         output = x
-
         for layer in self.layers:
             output = layer.forward(output, training=training)
-
         return output
 
     def backward(self, dvalues):
+        """Backward pass through all layers in reverse order.
 
+        Args:
+            dvalues: Gradient from the loss function.
+        """
         for layer in reversed(self.layers):
             dvalues = layer.backward(dvalues)
 
-    def predict(self, x):
+    def predict(self, x, batch_size=None, verbose=0):
+        """Make predictions without updating weights.
 
-        return self.forward(x, training=False)
+        Args:
+            x: Input data.
+            batch_size: If provided, predict in batches.
+            verbose: 0=silent, 1=progress bar.
+
+        Returns:
+            ndarray of predictions.
+        """
+        if batch_size is None:
+            return self.forward(x, training=False)
+
+        predictions = []
+        samples = len(x)
+        for start_idx in range(0, samples, batch_size):
+            end_idx = min(start_idx + batch_size, samples)
+            batch_preds = self.forward(x[start_idx:end_idx], training=False)
+            predictions.append(batch_preds)
+            if verbose:
+                print(f"Predicting: {end_idx}/{samples}")
+        return np.vstack(predictions)
+
+    def predict_proba(self, x, batch_size=None):
+        """Return probabilistic predictions.
+
+        Alias for predict() for API consistency.
+
+        Args:
+            x: Input data.
+            batch_size: If provided, predict in batches.
+
+        Returns:
+            ndarray of predictions (same as predict()).
+        """
+        return self.predict(x, batch_size=batch_size)
 
     def compile(
         self,
@@ -82,13 +216,53 @@ class Sequential:
         optimizer,
         metric=None
     ):
+        """Configure the model for training.
 
+        Args:
+            loss: Loss function instance.
+            optimizer: Optimizer instance.
+            metric: Optional metric for evaluation.
+        """
         self.loss_function = loss
         self.optimizer = optimizer
         self.metric = metric
 
+    def summary(self):
+        """Print a summary of the model architecture.
+
+        Shows layer types, output shapes, and parameter counts.
+        """
+        print("=" * 60)
+        print(f"{'Layer':<25} {'Output Shape':<20} {'Parameters':<10}")
+        print("=" * 60)
+
+        total_params = 0
+        input_shape = None
+
+        for i, layer in enumerate(self.layers):
+            layer_name = type(layer).__name__
+            if hasattr(layer, 'weights'):
+                params = layer.weights.size + layer.biases.size
+                output_shape = getattr(layer, 'output_shape', '(None, ?)')
+                total_params += params
+            else:
+                params = 0
+                output_shape = '(None, ?)'
+            if input_shape is None and hasattr(layer, 'output_shape'):
+                input_shape = layer.output_shape
+
+            print(f"{layer_name}{i}<->{'':<15} {str(output_shape):<20} {params:<10}")
+
+        print("=" * 60)
+        print(f"Trainable params: {total_params}")
+        print("=" * 60)
+
     def save(self, filename):
-        """Save model weights to a file."""
+        """Save model weights to a file.
+
+        Args:
+            filename: Path where weights will be saved.
+        """
         from kronyx.serialization import save
         save(self, filename)
 
@@ -102,9 +276,40 @@ class Sequential:
         save(self, filename)
 
     def load(self, filename):
-        """Load model weights from a file."""
+        """Load model weights from a file.
+
+        Args:
+            filename: Path to load weights from.
+        """
         from kronyx.serialization import load
         load(self, filename)
+
+    def evaluate(self, x, y, batch_size=None, verbose=0):
+        """Evaluate the model on test data.
+
+        Args:
+            x: Input data.
+            y: True labels.
+            batch_size: If provided, evaluate in batches.
+            verbose: 0=silent, 1=progress.
+
+        Returns:
+            Tuple of (loss, accuracy).
+        """
+        predictions = self.predict(x, batch_size=batch_size)
+        loss = self.loss_function.forward(y, predictions)
+
+        if self.metric:
+            accuracy = self.metric.calculate(y, predictions)
+        else:
+            accuracy = 0.0
+
+        if verbose:
+            print(f"loss: {loss:.4f}")
+            if self.metric:
+                print(f"accuracy: {accuracy*100:.1f}%")
+
+        return (loss, accuracy)
 
     def fit(
         self,
@@ -117,9 +322,27 @@ class Sequential:
         batch_size=None,
         shuffle=True,
         validation_data=None,
-        callbacks=None
+        callbacks=None,
+        verbose=1
     ):
+        """Train the model on the given data.
 
+        Args:
+            x: Training input data.
+            y: Training target labels.
+            epochs: Number of training epochs.
+            loss: Deprecated - use compile().
+            optimizer: Deprecated - use compile().
+            metric: Deprecated - use compile().
+            batch_size: Batch size for training (default: all samples).
+            shuffle: Whether to shuffle training data.
+            validation_data: Optional (x_val, y_val) tuple.
+            callbacks: List of callback instances.
+            verbose: 0=silent, 1=progress every epoch, 2=detailed metrics.
+
+        Returns:
+            History instance with training metrics.
+        """
         if loss is not None or optimizer is not None or metric is not None:
             warnings.warn(
                 "Passing loss, optimizer, or metric to fit() is deprecated. "
@@ -218,38 +441,42 @@ class Sequential:
                 for callback in callbacks:
                     callback.on_batch_end(batch_idx, logs)
 
-            avg_loss = epoch_loss / num_batches
+avg_loss = epoch_loss / num_batches
 
             history.loss.append(avg_loss)
-
+            history.epochs.append(epoch)
             logs["loss"] = avg_loss
 
+            avg_accuracy = None
             if self.metric:
                 avg_accuracy = epoch_accuracy / num_batches
                 history.accuracy.append(avg_accuracy)
                 logs["accuracy"] = avg_accuracy
 
+            val_loss = None
+            val_accuracy = None
             if validation_data is not None:
 
                 x_val, y_val = validation_data
-                val_predictions = self.forward(x_val, training=False)
-                val_loss = self.loss_function.forward(y_val, val_predictions)
+                val_loss = self.loss_function.forward(y_val, self.forward(x_val, training=False))
                 history.val_loss.append(val_loss)
                 logs["val_loss"] = val_loss
 
                 if self.metric:
-                    val_accuracy = self.metric.calculate(y_val, val_predictions)
+                    val_accuracy = self.metric.calculate(y_val, self.forward(x_val, training=False))
                     history.val_accuracy.append(val_accuracy)
                     logs["val_accuracy"] = val_accuracy
 
             logs["epoch"] = epoch
 
             if self.optimizer is not None:
-                logs["learning_rate"] = getattr(
+                lr = getattr(
                     self.optimizer,
                     "learning_rate",
                     None
                 )
+                history.learning_rate.append(lr)
+                logs["learning_rate"] = lr
 
             for callback in callbacks:
                 callback.on_epoch_end(epoch, logs)
@@ -257,23 +484,42 @@ class Sequential:
             if getattr(self, "stop_training", False):
                 break
 
-            if epoch % 100 == 0:
-                if self.metric:
-                    msg = (
-                        f"Epoch {epoch} "
-                        f"Loss: {avg_loss:.6f} "
-                        f"Accuracy: {avg_accuracy:.4f}"
-                    )
-                    if validation_data is not None:
-                        msg += (
-                            f" Val Loss: {val_loss:.6f} "
-                            f"Val Accuracy: {val_accuracy:.4f}"
-                        )
-                    print(msg)
-                else:
-                    print(f"Epoch {epoch} Loss: {avg_loss:.6f}")
+            if verbose > 0:
+                self._print_epoch(epoch, epochs, avg_loss, avg_accuracy,
+                                   val_loss if validation_data else None,
+                                   val_accuracy if validation_data else None,
+                                   lr)
 
         for callback in callbacks:
             callback.on_train_end(logs)
 
         return history
+
+    def _print_epoch(self, epoch, epochs, loss, accuracy,
+                      val_loss=None, val_accuracy=None, lr=None):
+        """Print epoch progress with formatted metrics.
+
+        Args:
+            epoch: Current epoch number.
+            epochs: Total epochs.
+            loss: Training loss.
+            accuracy: Training accuracy.
+            val_loss: Optional validation loss.
+            val_accuracy: Optional validation accuracy.
+            lr: Optional learning rate.
+        """
+        msg = f"Epoch {epoch + 1}/{epochs}"
+        if accuracy is not None:
+            msg += f"\n  loss: {loss:.4f}"
+            msg += f"\n  accuracy: {accuracy*100:.1f}%"
+        else:
+            msg += f"\n  loss: {loss:.4f}"
+
+        if val_loss is not None:
+            msg += f"\n  val_loss: {val_loss:.4f}"
+        if val_accuracy is not None:
+            msg += f"\n  val_accuracy: {val_accuracy*100:.1f}%"
+        if lr is not None:
+            msg += f"\n  learning_rate: {lr}"
+
+        print(msg)
