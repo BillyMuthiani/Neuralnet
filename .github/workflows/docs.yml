@@ -3,13 +3,6 @@ name: Documentation
 on:
   push:
     branches: [main]
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - 'ROADMAP.md'
-      - 'CODE_OF_CONDUCT.md'
   workflow_dispatch:
 
 permissions:
