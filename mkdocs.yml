@@ -1,0 +1,68 @@
+site_name: Kronyx
+site_description: Lightweight deep learning framework built from first principles using NumPy
+site_url: https://kronyx.github.io/kronyx
+repo_url: https://github.com/Kronyx/kronyx
+repo_name: Kronyx/kronyx
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+  features:
+    - navigation.expand
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.share
+    - search.suggest
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys; sys.path.append('..')
+          options:
+            documentation_style: google
+            show_root_heading: true
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quick Start: quickstart.md
+  - Tutorials:
+      - tutorials.md
+      - training.md
+      - callbacks.md
+      - serialization.md
+  - Examples:
+      - examples.md
+      - benchmarks.md
+  - API Reference:
+      - Models: api/models.md
+      - Layers: api/layers.md
+      - Optimations: api/optimizers.md
+      - Losses: api/losses.md
+      - Metrics: api/metrics.md
+      - Callbacks: api/callbacks.md
+      - Serialization: api/serialization.md
+  - Contributing:
+      - Roadmap: roadmap.md
+      - Changelog: changelog.md
+      - CODE_OF_CONDUCT.md

@@ -2,6 +2,8 @@
 
 A lightweight deep learning framework built from first principles using NumPy. Designed for education, research, and production use with a clean Keras-like API.
 
+[![PyPI](https://img.shields.io/badge/PyPI-kronyx-blue.svg)](https://pypi.org/project/kronyx/)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://kronyx.github.io/kronyx)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/Kronyx/kronyx/actions/workflows/tests.yml/badge.svg)](https://github.com/Kronyx/kronyx/actions/workflows/tests.yml)
@@ -10,13 +12,15 @@ A lightweight deep learning framework built from first principles using NumPy. D
 
 ## Features
 
-- **Layers**: Dense, Conv2D, BatchNormalization, Dropout, Flatten
-- **Activations**: ReLU, Sigmoid, Tanh, Softmax
-- **Optimizers**: SGD, Adam
-- **Callbacks**: EarlyStopping, ModelCheckpoint, CSVLogger, ReduceLROnPlateau
-- **Serialization**: Complete model save/load with `.krx` format
-- **NumPy backend**: Pure NumPy implementation, no external ML dependencies
-- **Type safe**: Full mypy type annotations
+| Feature | Description |
+|---------|-------------|
+| **Pure NumPy** | No external ML dependencies, just NumPy |
+| **Clean API** | Keras-like Sequential model interface |
+| **Layers** | Dense, Conv2D, Flatten, Dropout, BatchNormalization |
+| **Activations** | ReLU, Sigmoid, Tanh, Softmax |
+| **Optimizers** | SGD, Adam with full state management |
+| **Callbacks** | EarlyStopping, ModelCheckpoint, CSVLogger, ReduceLROnPlateau |
+| **Serialization** | Save/load models with .krx format |
 
 ## Installation
 
