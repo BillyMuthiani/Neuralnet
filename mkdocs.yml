@@ -25,14 +25,6 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          setup_commands:
-            - import sys; sys.path.append('..')
-          options:
-            documentation_style: google
-            show_root_heading: true
 
 markdown_extensions:
   - admonition
@@ -47,22 +39,24 @@ nav:
   - Installation: installation.md
   - Quick Start: quickstart.md
   - Tutorials:
-      - tutorials.md
-      - training.md
-      - callbacks.md
-      - serialization.md
+      - Getting Started: getting_started.md
+      - Sequential API: sequential.md
+      - Layers: layers.md
+      - Training: training.md
+      - Callbacks: callbacks.md
+      - Serialization: serialization.md
   - Examples:
-      - examples.md
-      - benchmarks.md
+      - Examples Gallery: examples.md
+      - Benchmarks: benchmarks.md
   - API Reference:
       - Models: api/models.md
       - Layers: api/layers.md
-      - Optimations: api/optimizers.md
+      - Optimizers: api/optimizers.md
       - Losses: api/losses.md
       - Metrics: api/metrics.md
       - Callbacks: api/callbacks.md
       - Serialization: api/serialization.md
   - Contributing:
-      - Roadmap: roadmap.md
-      - Changelog: changelog.md
-      - CODE_OF_CONDUCT.md
+      - Roadmap: ../ROADMAP.md
+      - Changelog: ../CHANGELOG.md
+      - Code of Conduct: ../CODE_OF_CONDUCT.md
