@@ -56,4 +56,3 @@ pip install kronyx
 
 Full documentation is available at [kronyx.github.io/kronyx](https://kronyx.github.io/kronyx).
 
-67
